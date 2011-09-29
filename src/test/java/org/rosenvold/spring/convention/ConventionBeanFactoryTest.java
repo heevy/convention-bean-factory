@@ -26,7 +26,7 @@ import static junit.framework.Assert.*;
  * @author Kristian Rosenvold
  */
 public class ConventionBeanFactoryTest {
-    private final ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory(null);
+    private final ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory(null, new TestBeanClassResolver());
 
     @Test
     public void containsBean() throws Exception {

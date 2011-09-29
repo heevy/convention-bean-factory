@@ -7,6 +7,7 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
+    <bean class="org.rosenvold.spring.convention.TestBeanClassResolver"/>
     <bean class="org.rosenvold.spring.convention.TestServiceImpl" id="fud"/>
     <aop:aspectj-autoproxy proxy-target-class="false"/>
 

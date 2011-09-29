@@ -28,9 +28,19 @@ import java.lang.annotation.Annotation;
 public class ConventionBeanFactory extends DefaultListableBeanFactory {
 
     private final ConfigurableApplicationContext parent;
+    private final BeanClassResolver beanClassResolver;
 
     public ConventionBeanFactory(ConfigurableApplicationContext parent) {
+        super(parent);
         this.parent = parent;
+        this.beanClassResolver = parent.getBean(BeanClassResolver.class);
+    }
+
+
+    public ConventionBeanFactory(ConfigurableApplicationContext parentBeanFactory, BeanClassResolver beanClassResolver) {
+        super(parentBeanFactory);
+        this.parent = parentBeanFactory;
+        this.beanClassResolver = beanClassResolver;
     }
 
     @Override
@@ -105,7 +115,8 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
 
 
     private Class resolveImplClass(final String beanName) {
-        final Class aClass = resolveClass(beanName);
+        return beanClassResolver.resolveBean( beanName);
+/*        final Class aClass = resolveClass(beanName);
         if (aClass != null && aClass.isInterface()) {
             String target = "Default" + aClass.getSimpleName();
             final Class enclosingClass = aClass.getEnclosingClass();
@@ -114,7 +125,7 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
                     aClass.getPackage().getName() + "." + target;
             return resolveClass(ifName);
         }
-        return aClass;
+        return aClass;*/
     }
 
     private Class resolveClass(final Class beanClass) {

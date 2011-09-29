@@ -32,7 +32,6 @@ public class ConventionContextLoader extends AbstractContextLoader {
     private final GenericXmlContextLoader genericXmlContextLoader = new GenericXmlContextLoader();
 
 
-
     @Override
     protected String getResourceSuffix() {
         return "-convention";
@@ -52,7 +51,7 @@ public class ConventionContextLoader extends AbstractContextLoader {
 
         conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver());
         GenericApplicationContext genericApplicationContext = new GenericApplicationContext(conventionBeanFactory);
-        genericApplicationContext.refresh();
+        //genericApplicationContext.refresh();
         return genericApplicationContext;
     }
 }
