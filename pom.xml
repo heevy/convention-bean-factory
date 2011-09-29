@@ -7,6 +7,13 @@
     <artifactId>convention-bean-factory</artifactId>
     <description>A test project that automatically picks up staged versions from oss.sonatype.org
     </description>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
 
@@ -56,15 +63,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.aspectj</groupId>
-          <artifactId>aspectjrt</artifactId>
-          <version>1.6.6</version>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.6.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.aspectj</groupId>
-          <artifactId>aspectjweaver</artifactId>
-          <version>1.6.6</version>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.6.6</version>
             <scope>test</scope>
         </dependency>
 
