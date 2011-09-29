@@ -16,6 +16,8 @@ package org.rosenvold.spring.convention;
  * limitations under the License.
  */
 
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.support.SimpleAutowireCandidateResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -42,7 +44,15 @@ public class ConventionContextLoader extends AbstractContextLoader {
         final ConfigurableApplicationContext parent = genericXmlContextLoader.loadContext(locations);
 
         ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory(parent);
+
+        final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
+        autowiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
+        conventionBeanFactory.addBeanPostProcessor( autowiredAnnotationBeanPostProcessor);
+
+
+        conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver());
         GenericApplicationContext genericApplicationContext = new GenericApplicationContext(conventionBeanFactory);
+        genericApplicationContext.refresh();
         return genericApplicationContext;
     }
 }

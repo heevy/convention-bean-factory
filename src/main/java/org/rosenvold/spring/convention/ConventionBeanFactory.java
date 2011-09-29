@@ -15,10 +15,12 @@ package org.rosenvold.spring.convention;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.annotation.Annotation;
@@ -34,8 +36,8 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     @Override
     public <T> T getBean(Class<T> requiredType) throws BeansException {
         final Class aClass = resolveClass(requiredType);
-        if (aClass == null){
-            return parent.getBean( requiredType);
+        if (aClass == null) {
+            return parent.getBean(requiredType);
         }
         return instantiate(aClass);
     }
@@ -43,7 +45,7 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     @Override
     public Object getBean(String name) throws BeansException {
         final Class<?> type = getType(name);
-        return type != null ? instantiate(type) : parent.getBean( name);
+        return type != null ? instantiate(type) : parent.getBean(name);
     }
 
     @Override
@@ -79,7 +81,8 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     @Override
     public boolean isTypeMatch(String s, Class aClass) throws NoSuchBeanDefinitionException {
         final Class aClass1 = resolveImplClass(s);
-        return aClass.isAssignableFrom( aClass1);
+        if (aClass1 == null) return false;
+        return aClass.isAssignableFrom(aClass1);
     }
 
     @Override
@@ -101,14 +104,14 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     }
 
 
-    private Class resolveImplClass(final String beanName){
+    private Class resolveImplClass(final String beanName) {
         final Class aClass = resolveClass(beanName);
-        if (aClass != null && aClass.isInterface()){
+        if (aClass != null && aClass.isInterface()) {
             String target = "Default" + aClass.getSimpleName();
             final Class enclosingClass = aClass.getEnclosingClass();
             final String ifName = (enclosingClass != null) ?
-                    enclosingClass.getName() + "$" +  target:
-                    aClass.getPackage().getName() +  "." + target;
+                    enclosingClass.getName() + "$" + target :
+                    aClass.getPackage().getName() + "." + target;
             return resolveClass(ifName);
         }
         return aClass;
@@ -123,6 +126,14 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     }
 
     private <T> T instantiate(Class aClass) throws BeansException {
+        T bean = instantiateBean(aClass);
+        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(aClass.getName());
+        final T fud = (T) createBean(aClass.getName(), rootBeanDefinition, new Object[]{});
+        //initializeBean( "fud", bean, rootBeanDefinition);
+        return fud;
+    }
+
+    private <T> T instantiateBean(Class aClass) throws BeansException {
         if (aClass == null) return null;
         try {
             //noinspection unchecked
@@ -134,5 +145,11 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
         }
     }
 
+    @Override
+    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+        final Class aClass = resolveImplClass(type.getName());
+        if (aClass != null) return new String[]{aClass.getName()};
+        return parent.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+    }
 
 }

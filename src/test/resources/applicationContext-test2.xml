@@ -10,4 +10,8 @@
     <bean class="org.rosenvold.spring.convention.TestServiceImpl" id="fud"/>
     <aop:aspectj-autoproxy proxy-target-class="false"/>
 
+    <context:component-scan base-package="org.rosenvold">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/>
+    </context:component-scan>
+
 </beans>
