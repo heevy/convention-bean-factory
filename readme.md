@@ -1,0 +1,1 @@
+A convention based BeanFactory, for your pleasure
