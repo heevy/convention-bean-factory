@@ -1,19 +1,41 @@
 package org.rosenvold.spring.convention;
 
+/*
+ * Copyright 2011 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.annotation.Annotation;
 
-public class ConventionBeanFactory implements BeanFactory {
+public class ConventionBeanFactory extends DefaultListableBeanFactory {
+
+    private final ConfigurableApplicationContext parent;
+
+    public ConventionBeanFactory(ConfigurableApplicationContext parent) {
+        this.parent = parent;
+    }
 
     @Override
     public <T> T getBean(Class<T> requiredType) throws BeansException {
         final Class aClass = resolveClass(requiredType);
         if (aClass == null){
-            return null;
+            return parent.getBean( requiredType);
         }
         return instantiate(aClass);
     }
@@ -21,14 +43,14 @@ public class ConventionBeanFactory implements BeanFactory {
     @Override
     public Object getBean(String name) throws BeansException {
         final Class<?> type = getType(name);
-        return instantiate(type);
+        return type != null ? instantiate(type) : parent.getBean( name);
     }
 
     @Override
     public <T> T getBean(String s, Class<T> tClass) throws BeansException {
         final Class<?> type = getType(s);
         //noinspection unchecked
-        return isTypeMatch(s, tClass) ? (T) instantiate(type) : null;
+        return isTypeMatch(s, tClass) ? (T) instantiate(type) : parent.getBean(s, tClass);
     }
 
     @Override
@@ -81,7 +103,7 @@ public class ConventionBeanFactory implements BeanFactory {
 
     private Class resolveImplClass(final String beanName){
         final Class aClass = resolveClass(beanName);
-        if (aClass.isInterface()){
+        if (aClass != null && aClass.isInterface()){
             String target = "Default" + aClass.getSimpleName();
             final Class enclosingClass = aClass.getEnclosingClass();
             final String ifName = (enclosingClass != null) ?
@@ -101,6 +123,7 @@ public class ConventionBeanFactory implements BeanFactory {
     }
 
     private <T> T instantiate(Class aClass) throws BeansException {
+        if (aClass == null) return null;
         try {
             //noinspection unchecked
             return (T) aClass.newInstance();
