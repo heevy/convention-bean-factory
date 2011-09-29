@@ -15,7 +15,7 @@ public class ConventionContextLoaderTest {
         final ApplicationContext applicationContext = conventionContextLoader.loadContext("classpath:applicationContext-test.xml");
         TestService testService = (TestService) applicationContext.getBean("fud");
         assertNotNull( testService);
-        TestService2 testService2 = (TestService2) applicationContext.getBean(TestService2.class);
+        TestService2 testService2 = applicationContext.getBean(TestService2.class);
         assertNotNull( testService2);
 
     }
