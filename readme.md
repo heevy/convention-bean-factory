@@ -24,11 +24,11 @@ Don't use this unless you're comfortable with debugging open source code. Submit
 <h2>Using it</h2>
 
 Build this project and add the following to your pom:</p>
-    &lt;dependency></p>
-        &lt;groupId>org.rosenvold.spring&lt;/groupId></p>
-        &lt;artifactId>convention-bean-factory&lt;/artifactId></p>
-        &lt;version>0.1-SNAPSHOT&lt;/version></p>
-    &lt;/dependency></p>
+     &lt;dependency></p>
+         &lt;groupId>org.rosenvold.spring&lt;/groupId></p>
+         &lt;artifactId>convention-bean-factory&lt;/artifactId></p>
+         &lt;version>0.1-SNAPSHOT&lt;/version></p>
+     &lt;/dependency></p>
 
 (It will be published to central as soon as we reach 0.1 ;)<br/>
 
