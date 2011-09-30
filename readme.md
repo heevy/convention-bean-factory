@@ -61,6 +61,8 @@ Todo: Describe existing resolveBean implementations and how they
         convention pick it up instead.</p>
 
 
-<h2>Known limitations, submit patches with testscases</h2>
+<h1>Known limitations</h1>
+
+<h2>Submit patches with testscases, no testcase no can do</h2>
 - proptotype scope unsupported as of now
 - convention is not picky about deciding to use /anything/ satisfying a resolveBean as a bean.
