@@ -105,27 +105,9 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
         return new String[0];
     }
 
-    private Class resolveClass(final String beanName) {
-        try {
-            return Class.forName(beanName);
-        } catch (ClassNotFoundException ex) {
-            return null;
-        }
-    }
-
 
     private Class resolveImplClass(final String beanName) {
         return beanClassResolver.resolveBean( beanName);
-/*        final Class aClass = resolveClass(beanName);
-        if (aClass != null && aClass.isInterface()) {
-            String target = "Default" + aClass.getSimpleName();
-            final Class enclosingClass = aClass.getEnclosingClass();
-            final String ifName = (enclosingClass != null) ?
-                    enclosingClass.getName() + "$" + target :
-                    aClass.getPackage().getName() + "." + target;
-            return resolveClass(ifName);
-        }
-        return aClass;*/
     }
 
     private Class resolveClass(final Class beanClass) {
@@ -137,23 +119,9 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     }
 
     private <T> T instantiate(Class aClass) throws BeansException {
-        T bean = instantiateBean(aClass);
         RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(aClass.getName());
         final T fud = (T) createBean(aClass.getName(), rootBeanDefinition, new Object[]{});
-        //initializeBean( "fud", bean, rootBeanDefinition);
         return fud;
-    }
-
-    private <T> T instantiateBean(Class aClass) throws BeansException {
-        if (aClass == null) return null;
-        try {
-            //noinspection unchecked
-            return (T) aClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new BeanInitializationException("Fud", e);
-        } catch (IllegalAccessException e) {
-            throw new BeanInitializationException("Fud", e);
-        }
     }
 
     @Override
