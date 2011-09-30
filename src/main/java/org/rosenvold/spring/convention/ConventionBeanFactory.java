@@ -121,8 +121,9 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     private <T> T instantiate(Class aClass) throws BeansException {
         RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(aClass, true);
         System.out.println("instantiate aClass = " + aClass);
-        final T fud = (T) createBean(aClass.getName(), rootBeanDefinition, new Object[]{});
-        return fud;
+        return doGetBean(aClass.getName(), null, null, false);
+//        final T fud = (T) createBean(aClass.getName(), rootBeanDefinition, new Object[]{});
+//        return fud;
     }
 
     @Override
@@ -131,5 +132,13 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
         if (aClass != null) return new String[]{aClass.getName()};
         return parent.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
     }
+
+    @Override
+    protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
+        final Class<?> type = getType(beanName);
+        if (type != null) return new RootBeanDefinition(type, true);
+        return null;
+    }
+
 
 }

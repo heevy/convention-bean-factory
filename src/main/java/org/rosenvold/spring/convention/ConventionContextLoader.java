@@ -17,8 +17,10 @@ package org.rosenvold.spring.convention;
  */
 
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.SimpleAutowireCandidateResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -60,7 +62,6 @@ public class ConventionContextLoader extends AbstractContextLoader {
 
         conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver());
         GenericApplicationContext genericApplicationContext = new GenericApplicationContext(conventionBeanFactory);
-        //genericApplicationContext.refresh();
         return genericApplicationContext;
     }
 }
