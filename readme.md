@@ -52,12 +52,9 @@ Change your context loader to org.rosenvold.spring.convention.ConventionContextL
     }
 
 Make sure "ClassNameResolver" is registered as a spring bean, which will make convention pick it up.
-
 A call to getBean(org.fud.MyInterface.class) will result in a request to resolveBean("org.fud.MyInterface").
-
 The method resolveBean should return a class that maps/corresponds to the provided org.fud.MyInterface. If null
         is returned, it delegates onto the parent application context.
-
 Todo: Describe existing resolveBean implementations and how they
 
 3. Trim your old context. You might want to consider disabling all kinds of component-scanning, and make
