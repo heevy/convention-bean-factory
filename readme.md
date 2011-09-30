@@ -26,6 +26,7 @@ Don't use this unless you're comfortable with debugging open source code. Submit
 <h2>Using it</h2>
 
 Build this project and add the following to your pom:</p>
+
      <dependency>
          <groupId>org.rosenvold.spring&lt;/groupId>
          <artifactId>convention-bean-factory&lt;/artifactId>
