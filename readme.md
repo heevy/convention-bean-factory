@@ -49,12 +49,13 @@ Change/Make your context loader (MyContextLoader) to extend org.rosenvold.spring
 
 2. Implement a naming strategy:</p>
 
+{code}
 @Component
 public class ClassNameResolver implements  org.rosenvold.spring.convention.BeanClassResolver {
         .. implement a strategy ...
 }
+{code}
 
-        </p>
 Make sure "ClassNameResolver" is registered as a spring bean, which will make convention pick it up.
 
 A call to getBean(org.fud.MyInterface.class) will result in a request to resolveBean("org.fud.MyInterface").
