@@ -16,13 +16,18 @@ package org.rosenvold.spring.convention;
  * limitations under the License.
  */
 /**
+ * Allows a textual bean name to be mapped to an implementing class
  * @author Kristian Rosenvold
  */
 public interface BeanClassResolver {
     /**
      * Resolve a name to a class
-     * @param name The bean name
-     * @return A class or null if no resolution can be established
+     * @param name The bean name. This will usually be a full class name.
+     *             If this points to a class, it should be used as a bean directly.
+     *             If it points to an interface, the implementation should
+     *             decide how to map this to an implementation class.
+     * @return A class or null if no resolution can be established. Convention will
+     *             pass unresolvable names onto the parent context.
      */
     Class resolveBean(String name);
 }
