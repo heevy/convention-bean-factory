@@ -10,4 +10,6 @@ import org.springframework.stereotype.Component;
 public class DefaultTestService2 implements TestService2 {
     @Autowired
     public TestService testService;
+    @Autowired
+    public InterfaceLessService interfaceLessService;
 }

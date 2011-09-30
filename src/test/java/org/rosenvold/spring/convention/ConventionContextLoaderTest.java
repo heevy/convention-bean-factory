@@ -18,6 +18,7 @@ public class ConventionContextLoaderTest {
         DefaultTestService2 testService2 = (DefaultTestService2) applicationContext.getBean(TestService2.class);
         assertNotNull( testService2);
         assertNotNull( testService2.testService );
+        assertNotNull( testService2.interfaceLessService );
 
     }
 }
