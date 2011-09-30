@@ -17,8 +17,8 @@ package org.rosenvold.spring.convention;
  */
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -136,9 +136,28 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     @Override
     protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
         final Class<?> type = getType(beanName);
-        if (type != null) return new RootBeanDefinition(type, true);
+        if (type != null) {
+            final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
+            rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+            return rootBeanDefinition;
+        }
+
         return null;
     }
+
+    @Override
+    public boolean containsBeanDefinition(String beanName) {
+        final Class<?> type = getType(beanName);
+        return type != null;
+    }
+
+
+    @Override
+    public boolean containsSingleton(String beanName) {
+        final Class<?> type = getType(beanName);
+        return type != null;
+    }
+
 
 
 }
