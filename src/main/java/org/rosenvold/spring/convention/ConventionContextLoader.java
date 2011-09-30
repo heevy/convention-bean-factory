@@ -28,37 +28,41 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 /**
  * @author Kristian Rosenvold
  */
-public class ConventionContextLoader extends AbstractContextLoader {
+public class ConventionContextLoader
+    extends AbstractContextLoader
+{
 
     private final GenericXmlContextLoader genericXmlContextLoader = new GenericXmlContextLoader();
 
 
     @Override
-    protected String getResourceSuffix() {
+    protected String getResourceSuffix()
+    {
         return "-convention";
     }
 
-    @Override
-    public ApplicationContext loadContext(String... locations) throws Exception {
+    public ApplicationContext loadContext( String... locations )
+        throws Exception
+    {
 
-        final ConfigurableApplicationContext parent = genericXmlContextLoader.loadContext(locations);
+        final ConfigurableApplicationContext parent = genericXmlContextLoader.loadContext( locations );
 
-        ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory(parent);
+        ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory( parent );
 
 /*        RequiredAnnotationBeanPostProcessor requiredAnnotationBeanPostProcessor  =  new RequiredAnnotationBeanPostProcessor();
         requiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
         conventionBeanFactory.addBeanPostProcessor(requiredAnnotationBeanPostProcessor);
   */
-        AnnotationAwareAspectJAutoProxyCreator annotationAwareAspectJAutoProxyCreator = new AnnotationAwareAspectJAutoProxyCreator();
-        annotationAwareAspectJAutoProxyCreator.setBeanFactory( conventionBeanFactory);
-        conventionBeanFactory.addBeanPostProcessor( annotationAwareAspectJAutoProxyCreator);
-        final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
-        autowiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
-        conventionBeanFactory.addBeanPostProcessor( autowiredAnnotationBeanPostProcessor);
+        AnnotationAwareAspectJAutoProxyCreator annotationAwareAspectJAutoProxyCreator =
+            new AnnotationAwareAspectJAutoProxyCreator();
+        annotationAwareAspectJAutoProxyCreator.setBeanFactory( conventionBeanFactory );
+        conventionBeanFactory.addBeanPostProcessor( annotationAwareAspectJAutoProxyCreator );
+        final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor =
+            new AutowiredAnnotationBeanPostProcessor();
+        autowiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory );
+        conventionBeanFactory.addBeanPostProcessor( autowiredAnnotationBeanPostProcessor );
 
-
-        conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver());
-        GenericApplicationContext genericApplicationContext = new GenericApplicationContext(conventionBeanFactory);
-        return genericApplicationContext;
+        conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver() );
+        return new GenericApplicationContext( conventionBeanFactory );
     }
 }

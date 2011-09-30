@@ -7,9 +7,12 @@ import org.springframework.stereotype.Component;
  * @author Kristian Rosenvold
  */
 @Component
-public class DefaultTestService2 implements TestService2 {
+public class DefaultTestService2
+    implements TestService2
+{
     @Autowired
     public TestService testService;
+
     @Autowired
     public InterfaceLessService interfaceLessService;
 }

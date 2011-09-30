@@ -25,120 +25,163 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.annotation.Annotation;
 
-public class ConventionBeanFactory extends DefaultListableBeanFactory {
+public class ConventionBeanFactory
+    extends DefaultListableBeanFactory
+{
 
     private final ConfigurableApplicationContext parent;
+
     private final BeanClassResolver beanClassResolver;
 
-    public ConventionBeanFactory(ConfigurableApplicationContext parent) {
-        super(parent);
+    public ConventionBeanFactory( ConfigurableApplicationContext parent )
+    {
+        super( parent );
         this.parent = parent;
-        this.beanClassResolver = parent.getBean(BeanClassResolver.class);
+        this.beanClassResolver = parent.getBean( BeanClassResolver.class );
     }
 
 
-    public ConventionBeanFactory(ConfigurableApplicationContext parentBeanFactory, BeanClassResolver beanClassResolver) {
-        super(parentBeanFactory);
+    public ConventionBeanFactory( ConfigurableApplicationContext parentBeanFactory,
+                                  BeanClassResolver beanClassResolver )
+    {
+        super( parentBeanFactory );
         this.parent = parentBeanFactory;
         this.beanClassResolver = beanClassResolver;
     }
 
     @Override
-    public <T> T getBean(Class<T> requiredType) throws BeansException {
-        final Class aClass = resolveClass(requiredType);
-        if (aClass == null) {
-            return parent.getBean(requiredType);
+    public <T> T getBean( Class<T> requiredType )
+        throws BeansException
+    {
+        final Class aClass = resolveClass( requiredType );
+        if ( aClass == null )
+        {
+            return parent.getBean( requiredType );
         }
-        return instantiate(aClass);
+        return instantiate( aClass );
     }
 
     @Override
-    public Object getBean(String name) throws BeansException {
-        final Class<?> type = getType(name);
-        return type != null ? instantiate(type) : parent.getBean(name);
+    public Object getBean( String name )
+        throws BeansException
+    {
+        final Class<?> type = getType( name );
+        return type != null ? instantiate( type ) : parent.getBean( name );
     }
 
     @Override
-    public <T> T getBean(String s, Class<T> tClass) throws BeansException {
-        final Class<?> type = getType(s);
+    public <T> T getBean( String s, Class<T> tClass )
+        throws BeansException
+    {
+        final Class<?> type = getType( s );
         //noinspection unchecked
-        return isTypeMatch(s, tClass) ? (T) instantiate(type) : parent.getBean(s, tClass);
+        return isTypeMatch( s, tClass ) ? (T) instantiate( type ) : parent.getBean( s, tClass );
     }
 
     @Override
-    public Object getBean(String s, Object... objects) throws BeansException {
-        throw new NoSuchBeanDefinitionException("Dont know");
+    public Object getBean( String s, Object... objects )
+        throws BeansException
+    {
+        throw new NoSuchBeanDefinitionException( "Dont know" );
     }
 
     @Override
-    public boolean containsBean(String s) {
-        final Class<?> type = getType(s);
-        if (type == null) return false;
+    public boolean containsBean( String s )
+    {
+        final Class<?> type = getType( s );
+        if ( type == null )
+        {
+            return false;
+        }
         final Annotation[] annotations = type.getAnnotations();
         return annotations.length > 0;
     }
 
     @Override
-    public boolean isSingleton(String s) throws NoSuchBeanDefinitionException {
+    public boolean isSingleton( String s )
+        throws NoSuchBeanDefinitionException
+    {
         return true;
     }
 
     @Override
-    public boolean isPrototype(String s) throws NoSuchBeanDefinitionException {
+    public boolean isPrototype( String s )
+        throws NoSuchBeanDefinitionException
+    {
         return false;
     }
 
     @Override
-    public boolean isTypeMatch(String s, Class aClass) throws NoSuchBeanDefinitionException {
-        final Class aClass1 = resolveImplClass(s);
-        if (aClass1 == null) return parent.isTypeMatch( s, aClass);
-        return aClass.isAssignableFrom(aClass1);
+    public boolean isTypeMatch( String s, Class aClass )
+        throws NoSuchBeanDefinitionException
+    {
+        final Class aClass1 = resolveImplClass( s );
+        if ( aClass1 == null )
+        {
+            return parent.isTypeMatch( s, aClass );
+        }
+        return aClass.isAssignableFrom( aClass1 );
     }
 
     @Override
-    public Class<?> getType(String s) throws NoSuchBeanDefinitionException {
-        return resolveImplClass(s);
+    public Class<?> getType( String s )
+        throws NoSuchBeanDefinitionException
+    {
+        return resolveImplClass( s );
     }
 
     @Override
-    public String[] getAliases(String s) {
+    public String[] getAliases( String s )
+    {
         return new String[0];
     }
 
 
-    private Class resolveImplClass(final String beanName) {
-        return beanClassResolver.resolveBean( beanName);
+    private Class resolveImplClass( final String beanName )
+    {
+        return beanClassResolver.resolveBean( beanName );
     }
 
-    private Class resolveClass(final Class beanClass) {
-        return resolveImplClass(beanNameFromClass(beanClass));
+    private Class resolveClass( final Class beanClass )
+    {
+        return resolveImplClass( beanNameFromClass( beanClass ) );
     }
 
-    private String beanNameFromClass(final Class beanClass) {
+    private String beanNameFromClass( final Class beanClass )
+    {
         return beanClass.getName();
     }
 
-    private <T> T instantiate(Class aClass) throws BeansException {
-        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(aClass, true);
-        System.out.println("instantiate aClass = " + aClass);
-        return doGetBean(aClass.getName(), null, null, false);
+    private <T> T instantiate( Class aClass )
+        throws BeansException
+    {
+        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition( aClass, true );
+        System.out.println( "instantiate aClass = " + aClass );
+        return doGetBean( aClass.getName(), null, null, false );
 //        final T fud = (T) createBean(aClass.getName(), rootBeanDefinition, new Object[]{});
 //        return fud;
     }
 
     @Override
-    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
-        final Class aClass = resolveImplClass(type.getName());
-        if (aClass != null) return new String[]{aClass.getName()};
-        return parent.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+    public String[] getBeanNamesForType( Class type, boolean includeNonSingletons, boolean allowEagerInit )
+    {
+        final Class aClass = resolveImplClass( type.getName() );
+        if ( aClass != null )
+        {
+            return new String[]{ aClass.getName() };
+        }
+        return parent.getBeanNamesForType( type, includeNonSingletons, allowEagerInit );
     }
 
     @Override
-    protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
-        final Class<?> type = getType(beanName);
-        if (type != null) {
-            final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
-            rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+    protected RootBeanDefinition getMergedLocalBeanDefinition( String beanName )
+        throws BeansException
+    {
+        final Class<?> type = getType( beanName );
+        if ( type != null )
+        {
+            final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition( type, true );
+            rootBeanDefinition.setAutowireMode( AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE );
             return rootBeanDefinition;
         }
 
@@ -146,18 +189,19 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     }
 
     @Override
-    public boolean containsBeanDefinition(String beanName) {
-        final Class<?> type = getType(beanName);
+    public boolean containsBeanDefinition( String beanName )
+    {
+        final Class<?> type = getType( beanName );
         return type != null;
     }
 
 
     @Override
-    public boolean containsSingleton(String beanName) {
-        final Class<?> type = getType(beanName);
+    public boolean containsSingleton( String beanName )
+    {
+        final Class<?> type = getType( beanName );
         return type != null;
     }
-
 
 
 }
