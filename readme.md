@@ -63,3 +63,4 @@ Todo: Describe existing resolveBean implementations and how they
 
 <h2>Known limitations, submit patches with testscases</h2>
 - proptotype scope unsupported as of now
+- convention is not picky about deciding to use /anything/ satisfying a resolveBean as a bean.
