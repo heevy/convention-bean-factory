@@ -33,15 +33,12 @@ Build this project and add the following to your pom:</p>
 (It will be published to central as soon as we reach 0.1 ;)<br/>
 
 1. Change a context loader.</p>
-
 Change/Make your context loader (MyContextLoader) to extend org.rosenvold.spring.convention.ConventionContextLoader.</p>
-
     @RunWith(SpringJUnit4ClassRunner.class)</p>
     @ContextConfiguration(locations = {</p>
        "/applicationContext.xml"</p>
     }, loader = MyContextLoader.class)</p>
      ... Your test class...
-
 2. Implement a naming strategy:</p>
 
 {code}
