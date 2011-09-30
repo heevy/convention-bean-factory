@@ -1,6 +1,3 @@
-A convention based BeanFactory, for your pleasure
-
-- proptotype scope unsupported as of now
 <h1>convention-bean-factory</h1>
 
 An application context that can be put in front of your current 
@@ -69,3 +66,7 @@ Todo: Describe existing resolveBean implementations and how they
 <br/>
 3. Trim your old context. You might want to consider disabling all kinds of component-scanning, and make
         convention pick it up instead.</p>
+
+
+<h2>Known limitations, submit patches with testscases</h2>
+- proptotype scope unsupported as of now
