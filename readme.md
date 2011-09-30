@@ -38,10 +38,10 @@ Build this project and add the following to your pom:</p>
 1. Change a context loader.</p>
 Change your context loader to org.rosenvold.spring.convention.ConventionContextLoader (or extend it if you already have your own).</p>
 
-    @RunWith(SpringJUnit4ClassRunner.class)</p>
-    @ContextConfiguration(locations = {</p>
-       "/applicationContext.xml"</p>
-    }, loader = org.rosenvold.spring.convention.ConventionContextLoader.class)</p>
+    @RunWith(SpringJUnit4ClassRunner.class)
+    @ContextConfiguration(locations = {
+       "/applicationContext.xml"
+    }, loader = org.rosenvold.spring.convention.ConventionContextLoader.class)
      ... Your test class...
 
 2. Implement a naming strategy:</p>
