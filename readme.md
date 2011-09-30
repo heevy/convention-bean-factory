@@ -28,20 +28,22 @@ Don't use this unless you're comfortable with debugging open source code. Submit
 Build this project and add the following to your pom:</p>
 
      <dependency>
-         <groupId>org.rosenvold.spring&lt;/groupId>
-         <artifactId>convention-bean-factory&lt;/artifactId>
-         <version>0.1-SNAPSHOT&lt;/version>
-     <dependency></p>
+         <groupId>org.rosenvold.spring</groupId>
+         <artifactId>convention-bean-factory</artifactId>
+         <version>0.1-SNAPSHOT</version>
+     <dependency>
 
 (It will be published to central as soon as we reach 0.1 ;)<br/>
 
 1. Change a context loader.</p>
 Change your context loader to org.rosenvold.spring.convention.ConventionContextLoader (or extend it if you already have your own).</p>
+
     @RunWith(SpringJUnit4ClassRunner.class)</p>
     @ContextConfiguration(locations = {</p>
        "/applicationContext.xml"</p>
     }, loader = org.rosenvold.spring.convention.ConventionContextLoader.class)</p>
      ... Your test class...
+
 2. Implement a naming strategy:</p>
 
     @Component
