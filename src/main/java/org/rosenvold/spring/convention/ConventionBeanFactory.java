@@ -119,7 +119,7 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
     }
 
     private <T> T instantiate(Class aClass) throws BeansException {
-        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(aClass.getName());
+        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(aClass, true);
         System.out.println("instantiate aClass = " + aClass);
         final T fud = (T) createBean(aClass.getName(), rootBeanDefinition, new Object[]{});
         return fud;
