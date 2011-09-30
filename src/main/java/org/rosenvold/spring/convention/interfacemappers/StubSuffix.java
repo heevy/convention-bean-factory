@@ -3,11 +3,10 @@ package org.rosenvold.spring.convention.interfacemappers;
 /**
  * @author Kristian Rosenvold
  */
-public class DefaultPrefix
-    extends Prefix
+public class StubSuffix
 {
-    public DefaultPrefix()
+    public String prefixed( Class aClass )
     {
-        super( "Default" );
+        return aClass.getName() + "Stub";
     }
 }

@@ -37,7 +37,9 @@ public class ConventionBeanFactory
     {
         super( parent );
         this.parent = parent;
-        this.beanClassResolver = parent.getBean( BeanClassResolver.class );
+
+        final BeanClassResolver bean = parent.getBean( BeanClassResolver.class );
+        this.beanClassResolver = bean != null  ? bean : new DefaultBeanClassResolver();
     }
 
 
@@ -155,11 +157,7 @@ public class ConventionBeanFactory
     private <T> T instantiate( Class aClass )
         throws BeansException
     {
-        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition( aClass, true );
-        System.out.println( "instantiate aClass = " + aClass );
         return doGetBean( aClass.getName(), null, null, false );
-//        final T fud = (T) createBean(aClass.getName(), rootBeanDefinition, new Object[]{});
-//        return fud;
     }
 
     @Override

@@ -3,11 +3,11 @@ package org.rosenvold.spring.convention.interfacemappers;
 /**
  * @author Kristian Rosenvold
  */
-public class DefaultPrefix
+public class StubPrefix
     extends Prefix
 {
-    public DefaultPrefix()
+    public StubPrefix()
     {
-        super( "Default" );
+        super( "Stub" );
     }
 }

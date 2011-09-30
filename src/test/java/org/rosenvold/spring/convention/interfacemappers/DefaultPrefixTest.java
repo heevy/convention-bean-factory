@@ -16,7 +16,7 @@ public class DefaultPrefixTest
     {
         DefaultPrefix defaultPrefix = new DefaultPrefix();
         assertEquals( "org.rosenvold.spring.convention.interfacemappers.DefaultPrefixTest$DefaultFud",
-                      defaultPrefix.prefixed( Fud.class ) );
+                      defaultPrefix.getRemappedName( Fud.class ) );
 
     }
 
@@ -26,7 +26,7 @@ public class DefaultPrefixTest
     {
         DefaultPrefix defaultPrefix = new DefaultPrefix();
         assertEquals( "org.rosenvold.spring.convention.DefaultTestService2",
-                      defaultPrefix.prefixed( TestService2.class ) );
+                      defaultPrefix.getRemappedName( TestService2.class ) );
 
     }
 
