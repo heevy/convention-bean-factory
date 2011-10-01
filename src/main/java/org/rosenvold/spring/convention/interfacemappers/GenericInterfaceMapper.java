@@ -16,12 +16,12 @@ package org.rosenvold.spring.convention.interfacemappers;
  */
 
 import org.rosenvold.spring.convention.CandidateEvaluator;
-import org.rosenvold.spring.convention.InterfaceMapper;
+import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
 
 /**
  * @author Kristian Rosenvold
  */
-public abstract class GenericInterfaceMapper implements InterfaceMapper {
+public abstract class GenericInterfaceMapper implements InterfaceToImplementationMapper {
     private final CandidateEvaluator candidateEvaluator;
 
     protected GenericInterfaceMapper(CandidateEvaluator candidateEvaluator) {

@@ -3,7 +3,7 @@ package org.rosenvold.spring.convention;
 /**
  * @author Kristian Rosenvold
  */
-public class TestBeanClassResolver implements BeanClassResolver {
+public class TestBeanClassResolver implements NameToClassResolver {
     public Class resolveBean(String name) {
         final Class aClass = resolveClass(name);
         if (aClass != null && aClass.isInterface()) {

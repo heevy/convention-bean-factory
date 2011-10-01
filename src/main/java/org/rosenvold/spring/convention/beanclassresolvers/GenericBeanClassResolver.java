@@ -1,15 +1,15 @@
 package org.rosenvold.spring.convention.beanclassresolvers;
 
-import org.rosenvold.spring.convention.BeanClassResolver;
-import org.rosenvold.spring.convention.InterfaceMapper;
+import org.rosenvold.spring.convention.NameToClassResolver;
+import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
 
 /**
  * @author Kristian Rosenvold
  */
-public class GenericBeanClassResolver implements BeanClassResolver {
-    private final InterfaceMapper[] mappers;
+public class GenericBeanClassResolver implements NameToClassResolver {
+    private final InterfaceToImplementationMapper[] mappers;
 
-    public GenericBeanClassResolver(InterfaceMapper... mappers) {
+    public GenericBeanClassResolver(InterfaceToImplementationMapper... mappers) {
         this.mappers = mappers;
     }
 
@@ -20,7 +20,7 @@ public class GenericBeanClassResolver implements BeanClassResolver {
             for (int i = 0; i < mapperCount; i++){
                 final Class beanClass = mappers[i].getBeanClass(aClass);
                 if (beanClass != null){
-                    return null;
+                    return beanClass;
                 }
             }
         }

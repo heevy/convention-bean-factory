@@ -31,19 +31,19 @@ public class ConventionBeanFactory
 
     private final ConfigurableApplicationContext parent;
 
-    private final BeanClassResolver beanClassResolver;
+    private final NameToClassResolver beanClassResolver;
 
     public ConventionBeanFactory(ConfigurableApplicationContext parent) {
         super(parent);
         this.parent = parent;
 
-        final BeanClassResolver bean = parent.getBean(BeanClassResolver.class);
+        final NameToClassResolver bean = parent.getBean(NameToClassResolver.class);
         this.beanClassResolver = bean != null ? bean : new DefaultBeanClassResolver();
     }
 
 
     public ConventionBeanFactory(ConfigurableApplicationContext parentBeanFactory,
-                                 BeanClassResolver beanClassResolver) {
+                                 NameToClassResolver beanClassResolver) {
         super(parentBeanFactory);
         this.parent = parentBeanFactory;
         this.beanClassResolver = beanClassResolver;

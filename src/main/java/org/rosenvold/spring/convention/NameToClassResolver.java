@@ -21,7 +21,7 @@ package org.rosenvold.spring.convention;
  *
  * @author Kristian Rosenvold
  */
-public interface BeanClassResolver {
+public interface NameToClassResolver {
     /**
      * Resolve a name to a class
      *
