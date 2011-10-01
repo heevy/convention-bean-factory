@@ -31,7 +31,9 @@ public abstract class GenericInterfaceMapper implements InterfaceToImplementatio
     @Override
     public Class getBeanClass(Class aClass) {
         final String s = getRemappedName(aClass);
+        if (s == null) return null;
         final Class prospect = resolveClass(s);
+        if (prospect == null) return null;
         return candidateEvaluator.isBean(prospect) ? prospect : null;
     }
 

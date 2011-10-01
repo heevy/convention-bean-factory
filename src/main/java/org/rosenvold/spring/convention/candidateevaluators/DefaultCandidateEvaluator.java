@@ -13,9 +13,9 @@ public class DefaultCandidateEvaluator implements CandidateEvaluator {
     @Override
     public boolean isBean(Class prospect) {
         //noinspection unchecked
-        return prospect.getAnnotation(Repository.class) != null ||
-                prospect.getAnnotation(Component.class) != null ||
-                prospect.getAnnotation(Service.class) != null ||
-                prospect.getAnnotation(Controller.class) != null;
+        return prospect.isAnnotationPresent(Repository.class) ||
+                prospect.isAnnotationPresent(Component.class) ||
+                prospect.isAnnotationPresent(Service.class) ||
+                prospect.isAnnotationPresent(Controller.class);
     }
 }

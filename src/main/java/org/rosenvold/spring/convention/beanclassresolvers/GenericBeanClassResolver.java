@@ -23,6 +23,7 @@ public class GenericBeanClassResolver implements NameToClassResolver {
                     return beanClass;
                 }
             }
+            return null;
         }
         return aClass;
     }
