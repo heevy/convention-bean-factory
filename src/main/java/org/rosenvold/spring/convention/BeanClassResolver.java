@@ -21,8 +21,7 @@ package org.rosenvold.spring.convention;
  *
  * @author Kristian Rosenvold
  */
-public interface BeanClassResolver
-{
+public interface BeanClassResolver {
     /**
      * Resolve a name to a class
      *
@@ -33,5 +32,5 @@ public interface BeanClassResolver
      * @return A class or null if no resolution can be established. Convention will
      *         pass unresolvable names onto the parent context.
      */
-    Class resolveBean( String name );
+    Class resolveBean(String name);
 }

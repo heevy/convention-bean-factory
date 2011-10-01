@@ -1,4 +1,4 @@
-package org.rosenvold.spring.convention.interfacemappers;
+package org.rosenvold.spring.convention;
 /*
  * Copyright 2011 the original author or authors.
  *
@@ -15,14 +15,17 @@ package org.rosenvold.spring.convention.interfacemappers;
  * limitations under the License.
  */
 
-import org.rosenvold.spring.convention.CandidateEvaluator;
-
 /**
+ * Decides if a class found by convention is eligible to use as a bean.
+ *
  * @author Kristian Rosenvold
  */
-public class StubPrefix extends Prefix {
-
-    public StubPrefix(CandidateEvaluator candidateEvaluator) {
-        super("Stub", candidateEvaluator);
-    }
+public interface CandidateEvaluator {
+    /**
+     * Decides if prospect can be used as a spring bean
+     *
+     * @param prospect The class to consider
+     * @return true if it can be used as a bean
+     */
+    boolean isBean(Class prospect);
 }

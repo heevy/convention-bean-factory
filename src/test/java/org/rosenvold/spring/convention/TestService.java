@@ -3,6 +3,5 @@ package org.rosenvold.spring.convention;
 /**
  * @author Kristian Rosenvold
  */
-public interface TestService
-{
+public interface TestService {
 }

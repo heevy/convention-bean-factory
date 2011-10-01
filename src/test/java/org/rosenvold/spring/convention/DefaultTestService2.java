@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DefaultTestService2
-    implements TestService2
-{
+        implements TestService2 {
     @Autowired
     public TestService testService;
 

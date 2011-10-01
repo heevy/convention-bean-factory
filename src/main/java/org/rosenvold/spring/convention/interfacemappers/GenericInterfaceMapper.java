@@ -16,17 +16,35 @@ package org.rosenvold.spring.convention.interfacemappers;
  */
 
 import org.rosenvold.spring.convention.CandidateEvaluator;
+import org.rosenvold.spring.convention.InterfaceMapper;
 
 /**
  * @author Kristian Rosenvold
  */
-public class StubSuffix extends GenericInterfaceMapper {
-    public StubSuffix(CandidateEvaluator candidateEvaluator) {
-        super(candidateEvaluator);
+public abstract class GenericInterfaceMapper implements InterfaceMapper {
+    private final CandidateEvaluator candidateEvaluator;
+
+    protected GenericInterfaceMapper(CandidateEvaluator candidateEvaluator) {
+        this.candidateEvaluator = candidateEvaluator;
     }
 
     @Override
-    String getRemappedName(Class aClass) {
-        return aClass.getName() + "Stub";
+    public Class getBeanClass(Class aClass) {
+        final String s = getRemappedName(aClass);
+        final Class prospect = resolveClass(s);
+        return candidateEvaluator.isBean(prospect) ? prospect : null;
     }
+
+    abstract String getRemappedName(Class aClass);
+
+
+    protected Class resolveClass(final String beanName) {
+        try {
+            return Class.forName(beanName);
+        } catch (ClassNotFoundException ex) {
+            return null;
+        }
+    }
+
+
 }
