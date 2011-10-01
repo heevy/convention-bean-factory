@@ -16,6 +16,7 @@ package org.rosenvold.spring.convention;
  * limitations under the License.
  */
 
+import org.rosenvold.spring.convention.beanclassresolvers.DefaultBeanClassResolver;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;

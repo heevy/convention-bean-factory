@@ -16,7 +16,7 @@ package org.rosenvold.spring.convention;
  */
 
 /**
- * Decides if a class found by convention is eligible to use as a bean.
+ * Decides if a class found by BeanClassResolver is eligible to use as a spring bean.
  *
  * @author Kristian Rosenvold
  */

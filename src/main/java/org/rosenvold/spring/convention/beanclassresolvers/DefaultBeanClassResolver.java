@@ -1,6 +1,6 @@
-package org.rosenvold.spring.convention;
+package org.rosenvold.spring.convention.beanclassresolvers;
 
-import org.rosenvold.spring.convention.beanclassresolvers.GenericBeanClassResolver;
+import org.rosenvold.spring.convention.CandidateEvaluator;
 import org.rosenvold.spring.convention.candidateevaluators.DefaultCandidateEvaluator;
 import org.rosenvold.spring.convention.interfacemappers.AdapterSuffix;
 import org.rosenvold.spring.convention.interfacemappers.DefaultPrefix;
