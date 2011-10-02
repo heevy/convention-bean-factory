@@ -1,15 +1,18 @@
 package org.rosenvold.spring.convention.beanclassresolvers;
 
-import org.rosenvold.spring.convention.NameToClassResolver;
+import org.rosenvold.spring.convention.CandidateEvaluator;
 import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
+import org.rosenvold.spring.convention.NameToClassResolver;
 
 /**
  * @author Kristian Rosenvold
  */
 public class GenericBeanClassResolver implements NameToClassResolver {
+    private final CandidateEvaluator candidateEvaluator;
     private final InterfaceToImplementationMapper[] mappers;
 
-    public GenericBeanClassResolver(InterfaceToImplementationMapper... mappers) {
+    public GenericBeanClassResolver(CandidateEvaluator candidateEvaluator, InterfaceToImplementationMapper... mappers) {
+        this.candidateEvaluator = candidateEvaluator;
         this.mappers = mappers;
     }
 
@@ -25,7 +28,7 @@ public class GenericBeanClassResolver implements NameToClassResolver {
             }
             return null;
         }
-        return aClass;
+        return candidateEvaluator.isBean(aClass) ? aClass : null ;
     }
 
     private Class resolveClass(final String beanName) {

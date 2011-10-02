@@ -11,6 +11,6 @@ import org.rosenvold.spring.convention.interfacemappers.DefaultPrefix;
 public class DefaultBeanClassResolver extends GenericBeanClassResolver{
     private static final CandidateEvaluator candidateEvaluator = new DefaultCandidateEvaluator();
     public DefaultBeanClassResolver() {
-        super(new DefaultPrefix(candidateEvaluator), new AdapterSuffix(candidateEvaluator));
+        super(candidateEvaluator, new DefaultPrefix(candidateEvaluator), new AdapterSuffix(candidateEvaluator));
     }
 }
