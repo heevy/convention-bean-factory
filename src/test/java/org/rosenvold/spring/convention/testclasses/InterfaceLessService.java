@@ -1,4 +1,4 @@
-package org.rosenvold.spring.convention;
+package org.rosenvold.spring.convention.testclasses;
 
 import org.springframework.stereotype.Component;
 

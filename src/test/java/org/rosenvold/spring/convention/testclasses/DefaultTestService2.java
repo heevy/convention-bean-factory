@@ -1,4 +1,4 @@
-package org.rosenvold.spring.convention;
+package org.rosenvold.spring.convention.testclasses;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

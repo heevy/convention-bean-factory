@@ -18,6 +18,7 @@ package org.rosenvold.spring.convention;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.rosenvold.spring.convention.testclasses.TestBeanClassResolver;
 import org.springframework.stereotype.Service;
 
 import static junit.framework.Assert.*;

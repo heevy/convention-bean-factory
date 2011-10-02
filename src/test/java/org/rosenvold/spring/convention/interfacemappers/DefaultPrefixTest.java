@@ -2,7 +2,7 @@ package org.rosenvold.spring.convention.interfacemappers;
 
 import org.junit.Test;
 import org.rosenvold.spring.convention.CandidateEvaluator;
-import org.rosenvold.spring.convention.TestService2;
+import org.rosenvold.spring.convention.testclasses.TestService2;
 import org.rosenvold.spring.convention.candidateevaluators.DefaultCandidateEvaluator;
 
 import static org.junit.Assert.assertEquals;
@@ -29,7 +29,7 @@ public class DefaultPrefixTest
         throws Exception
     {
         DefaultPrefix defaultPrefix = new DefaultPrefix();
-        assertEquals( "org.rosenvold.spring.convention.DefaultTestService2",
+        assertEquals( "org.rosenvold.spring.convention.testclasses.DefaultTestService2",
                       defaultPrefix.getBeanClassName(TestService2.class) );
 
     }

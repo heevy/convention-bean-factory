@@ -1,6 +1,9 @@
 package org.rosenvold.spring.convention;
 
 import org.junit.Test;
+import org.rosenvold.spring.convention.testclasses.DefaultTestService2;
+import org.rosenvold.spring.convention.testclasses.TestService;
+import org.rosenvold.spring.convention.testclasses.TestService2;
 import org.springframework.context.ApplicationContext;
 
 import static junit.framework.Assert.assertNotNull;

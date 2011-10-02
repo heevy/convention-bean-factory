@@ -1,4 +1,6 @@
-package org.rosenvold.spring.convention;
+package org.rosenvold.spring.convention.testclasses;
+
+import org.rosenvold.spring.convention.NameToClassResolver;
 
 /**
  * @author Kristian Rosenvold
