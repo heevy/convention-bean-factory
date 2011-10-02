@@ -25,7 +25,9 @@ public class StandardContextLoaderTest {
         DefaultTestService2 testService2 = (DefaultTestService2) applicationContext.getBean(TestService2.class);
         assertNotNull(testService2);
         assertNotNull(testService2.testService);
-        //final ApplicationContext bean1 = applicationContext.getBean(ApplicationContext.class);
+        assertNotNull(testService2.applicationContext);
+
+
         ListableBeanFactory listableBeanFactory = applicationContext;
         for (String bean : listableBeanFactory.getBeanDefinitionNames()) {
             System.out.println("bean = " + bean + listableBeanFactory.getBean( bean).getClass().getName());

@@ -19,6 +19,8 @@ package org.rosenvold.spring.convention;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rosenvold.spring.convention.testclasses.TestBeanClassResolver;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Service;
 
 import static junit.framework.Assert.*;
@@ -27,8 +29,9 @@ import static junit.framework.Assert.*;
  * @author Kristian Rosenvold
  */
 public class ConventionBeanFactoryTest {
+    ConfigurableApplicationContext  parent = new GenericApplicationContext();
     private final ConventionBeanFactory conventionBeanFactory =
-            new ConventionBeanFactory(null, new TestBeanClassResolver());
+            new ConventionBeanFactory(parent, new TestBeanClassResolver());
 
     @Test
     public void containsBean()
