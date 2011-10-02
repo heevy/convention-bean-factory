@@ -52,11 +52,9 @@ public class ConventionBeanFactory
     @Override
     public <T> T getBean(Class<T> requiredType)
             throws BeansException {
-        if (parent.getBeansOfType(requiredType).size() > 0) return parent.getBean( requiredType);
-
         final Class aClass = resolveClass(requiredType);
         if (aClass == null) {
-            return null;
+            return parent.getBean(requiredType);
         }
         return instantiate(aClass);
     }
@@ -64,8 +62,6 @@ public class ConventionBeanFactory
     @Override
     public Object getBean(String name)
             throws BeansException {
-        if (parent.containsBean( name)) return parent.getBean( name);
-
         final Class<?> type = getType(name);
         return type != null ? instantiate(type) : parent.getBean(name);
     }
@@ -73,8 +69,6 @@ public class ConventionBeanFactory
     @Override
     public <T> T getBean(String s, Class<T> tClass)
             throws BeansException {
-        if (parent.containsBean( s)) return parent.getBean( s, tClass);
-
         final Class<?> type = getType(s);
         //noinspection unchecked
         return type != null && isTypeMatch(s, tClass) ? (T) instantiate(type) : parent.getBean(s, tClass);
@@ -88,9 +82,9 @@ public class ConventionBeanFactory
 
     @Override
     public boolean containsBean(String s) {
-        final Class<?> type = getLocalType(s);
+        final Class<?> type = getType(s);
         if (type == null) {
-            return parent.containsBean( s);
+            return false;
         }
         // Todo: Use CandidateEvaluator
         final Annotation[] annotations = type.getAnnotations();
@@ -124,7 +118,7 @@ public class ConventionBeanFactory
             throws NoSuchBeanDefinitionException {
         final Class aClass = resolveImplClass(s);
         if (aClass == null){
-            return parent.getType( s);
+            return parent.containsBean( s) ? parent.getType( s) : null;
         }
         return aClass;
     }
@@ -182,7 +176,7 @@ public class ConventionBeanFactory
 
     @Override
     public boolean containsBeanDefinition(String beanName) {
-        final Class<?> type = getType(beanName);
+        final Class<?> type = getLocalType(beanName);
         return type != null;
     }
 
