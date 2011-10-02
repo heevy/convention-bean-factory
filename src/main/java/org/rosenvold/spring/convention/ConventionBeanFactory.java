@@ -153,12 +153,12 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
         final Class aClass = resolveImplClass(type.getName());
         if (aClass != null) {
             return new String[]{aClass.getName()};
         }
-        return parent.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+        return new String[]{};
     }
 
     @Override
@@ -175,7 +175,7 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public boolean containsBeanDefinition(String beanName) {
+    public boolean containsBeanDefinition(String beanName) {  // LBF; local only
         final Class<?> type = getLocalType(beanName);
         return type != null;
     }
