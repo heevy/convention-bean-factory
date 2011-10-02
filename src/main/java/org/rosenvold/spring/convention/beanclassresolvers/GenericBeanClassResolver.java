@@ -29,7 +29,7 @@ public class GenericBeanClassResolver implements NameToClassResolver {
             }
             return null;
         }
-        return candidateEvaluator.isBean(aClass) ? aClass : null ;
+        return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null ;
     }
 
     private Class resolveClass(final String beanName) {
