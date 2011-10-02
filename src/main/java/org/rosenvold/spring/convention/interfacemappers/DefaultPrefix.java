@@ -15,13 +15,11 @@ package org.rosenvold.spring.convention.interfacemappers;
  * limitations under the License.
  */
 
-import org.rosenvold.spring.convention.CandidateEvaluator;
-
 /**
  * @author Kristian Rosenvold
  */
 public class DefaultPrefix extends Prefix {
-    public DefaultPrefix(CandidateEvaluator candidateEvaluator) {
-        super("Default", candidateEvaluator);
+    public DefaultPrefix() {
+        super("Default");
     }
 }

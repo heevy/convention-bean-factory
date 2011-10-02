@@ -21,9 +21,10 @@ public class GenericBeanClassResolver implements NameToClassResolver {
         if (aClass != null && aClass.isInterface()) {
             final int mapperCount = mappers.length;
             for (int i = 0; i < mapperCount; i++){
-                final Class beanClass = mappers[i].getBeanClass(aClass);
-                if (beanClass != null){
-                    return beanClass;
+                final String beanClass = mappers[i].getBeanClassName(aClass);
+                if (beanClass != null) {
+                    final Class prospect = resolveClass(beanClass);
+                    if (prospect != null && candidateEvaluator.isBean(prospect)) return prospect;
                 }
             }
             return null;
@@ -38,6 +39,9 @@ public class GenericBeanClassResolver implements NameToClassResolver {
             return null;
         }
     }
+
+
+
 
 
 }

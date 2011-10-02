@@ -1,6 +1,6 @@
 package org.rosenvold.spring.convention.interfacemappers;
 
-import org.rosenvold.spring.convention.CandidateEvaluator;
+import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,13 +8,9 @@ import java.util.Map;
 /**
  * @author Kristian Rosenvold
  */
-public class UserSpecifiedMapper extends GenericInterfaceMapper {
+public class UserSpecifiedMapper implements InterfaceToImplementationMapper {
 
     private final Map<String, String> interfaceToImplementations = new HashMap<String, String>();
-
-    public UserSpecifiedMapper(CandidateEvaluator candidateEvaluator) {
-        super(candidateEvaluator);
-    }
 
     public UserSpecifiedMapper put( String interfaceName, String beanClass){
         interfaceToImplementations.put( interfaceName, beanClass);
@@ -25,7 +21,7 @@ public class UserSpecifiedMapper extends GenericInterfaceMapper {
     }
 
     @Override
-    String getRemappedName(Class aClass) {
+    public String getBeanClassName(Class aClass) {
         return interfaceToImplementations.get( aClass.getName());
     }
 }

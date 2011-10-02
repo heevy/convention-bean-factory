@@ -15,18 +15,15 @@ package org.rosenvold.spring.convention.interfacemappers;
  * limitations under the License.
  */
 
-import org.rosenvold.spring.convention.CandidateEvaluator;
+import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
 
 /**
  * @author Kristian Rosenvold
  */
-public class StubSuffix extends GenericInterfaceMapper {
-    public StubSuffix(CandidateEvaluator candidateEvaluator) {
-        super(candidateEvaluator);
-    }
+public class StubSuffix implements InterfaceToImplementationMapper {
 
     @Override
-    String getRemappedName(Class aClass) {
+    public String getBeanClassName(Class aClass) {
         return aClass.getName() + "Stub";
     }
 }

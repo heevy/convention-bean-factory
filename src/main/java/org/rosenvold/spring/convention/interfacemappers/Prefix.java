@@ -15,20 +15,19 @@ package org.rosenvold.spring.convention.interfacemappers;
  * limitations under the License.
  */
 
-import org.rosenvold.spring.convention.CandidateEvaluator;
+import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
 
 /**
  * @author Kristian Rosenvold
  */
-public abstract class Prefix extends GenericInterfaceMapper {
+public abstract class Prefix implements InterfaceToImplementationMapper {
     private final String prefix;
 
-    public Prefix(String prefix, CandidateEvaluator candidateEvaluator) {
-        super(candidateEvaluator);
+    public Prefix(String prefix) {
         this.prefix = prefix;
     }
 
-    String getRemappedName(Class aClass) {
+    public String getBeanClassName(Class aClass) {
         String target = prefix + aClass.getSimpleName();
         final Class enclosingClass = aClass.getEnclosingClass();
         return (enclosingClass == null)

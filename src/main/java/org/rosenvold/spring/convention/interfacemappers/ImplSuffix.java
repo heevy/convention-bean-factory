@@ -15,18 +15,14 @@ package org.rosenvold.spring.convention.interfacemappers;
  * limitations under the License.
  */
 
-import org.rosenvold.spring.convention.CandidateEvaluator;
+import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
 
 /**
  * @author Kristian Rosenvold
  */
-public class ImplSuffix extends GenericInterfaceMapper {
-    public ImplSuffix(CandidateEvaluator candidateEvaluator) {
-        super(candidateEvaluator);
-    }
+public class ImplSuffix implements InterfaceToImplementationMapper {
 
-    @Override
-    String getRemappedName(Class aClass) {
+    public String getBeanClassName(Class aClass) {
         return aClass.getName() + "Impl";
     }
 }

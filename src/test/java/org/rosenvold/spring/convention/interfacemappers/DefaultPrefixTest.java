@@ -18,9 +18,9 @@ public class DefaultPrefixTest
     public void testInnerClassIf()
         throws Exception
     {
-        DefaultPrefix defaultPrefix = new DefaultPrefix(candidateEvaluator);
+        DefaultPrefix defaultPrefix = new DefaultPrefix();
         assertEquals( "org.rosenvold.spring.convention.interfacemappers.DefaultPrefixTest$DefaultFud",
-                      defaultPrefix.getRemappedName( Fud.class ) );
+                      defaultPrefix.getBeanClassName(Fud.class) );
 
     }
 
@@ -28,9 +28,9 @@ public class DefaultPrefixTest
     public void testRegularIf()
         throws Exception
     {
-        DefaultPrefix defaultPrefix = new DefaultPrefix(candidateEvaluator);
+        DefaultPrefix defaultPrefix = new DefaultPrefix();
         assertEquals( "org.rosenvold.spring.convention.DefaultTestService2",
-                      defaultPrefix.getRemappedName( TestService2.class ) );
+                      defaultPrefix.getBeanClassName(TestService2.class) );
 
     }
 
