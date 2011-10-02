@@ -21,9 +21,19 @@ import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
  * @author Kristian Rosenvold
  */
 public class StubSuffix implements InterfaceToImplementationMapper {
+    private final PackageManipulator packageManipulator;
+
+    public StubSuffix() {
+        this( null);
+    }
+
+    public StubSuffix(PackageManipulator packageManipulator) {
+        this.packageManipulator = packageManipulator;
+    }
 
     @Override
     public String getBeanClassName(Class aClass) {
-        return aClass.getName() + "Stub";
+        String name = packageManipulator != null ? packageManipulator.getRemappedPackageName( aClass.getName()) : aClass.getName();
+        return name + "Stub";
     }
 }
