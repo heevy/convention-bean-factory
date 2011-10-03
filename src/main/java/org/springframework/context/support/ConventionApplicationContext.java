@@ -1,5 +1,6 @@
-package org.rosenvold.spring.convention;
+package org.springframework.context.support;
 
+import org.rosenvold.spring.convention.ConventionBeanFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -24,8 +25,7 @@ public class ConventionApplicationContext extends GenericApplicationContext {
         super(conventionBeanFactory);
     }
 
-    @Override
-    protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+    public void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
         // Tell the internal bean factory to use the context's class loader etc.
         beanFactory.setBeanClassLoader(getClassLoader());
         beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
@@ -101,82 +101,4 @@ public class ConventionApplicationContext extends GenericApplicationContext {
     }
     */
     }
-
-    static class ApplicationContextAwareProcessor implements BeanPostProcessor {
-
-        private final ConfigurableApplicationContext applicationContext;
-
-
-        /**
-         * Create a new ApplicationContextAwareProcessor for the given context.
-         */
-        public ApplicationContextAwareProcessor(ConfigurableApplicationContext applicationContext) {
-            this.applicationContext = applicationContext;
-        }
-
-
-        public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
-            AccessControlContext acc = null;
-
-            if (System.getSecurityManager() != null &&
-                    (bean instanceof EmbeddedValueResolverAware ||
-                            bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
-                            bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware)) {
-                acc = this.applicationContext.getBeanFactory().getAccessControlContext();
-            }
-
-            if (acc != null) {
-                AccessController.doPrivileged(new PrivilegedAction<Object>() {
-                    public Object run() {
-                        invokeAwareInterfaces(bean);
-                        return null;
-                    }
-                }, acc);
-            }
-            else {
-                invokeAwareInterfaces(bean);
-            }
-
-            return bean;
-        }
-
-        private void invokeAwareInterfaces(Object bean) {
-            if (bean instanceof EmbeddedValueResolverAware) {
-                ((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(
-                        new EmbeddedValueResolver(this.applicationContext.getBeanFactory()));
-            }
-            if (bean instanceof ResourceLoaderAware) {
-                ((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
-            }
-            if (bean instanceof ApplicationEventPublisherAware) {
-                ((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
-            }
-            if (bean instanceof MessageSourceAware) {
-                ((MessageSourceAware) bean).setMessageSource(this.applicationContext);
-            }
-            if (bean instanceof ApplicationContextAware) {
-                ((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
-            }
-        }
-
-        public Object postProcessAfterInitialization(Object bean, String beanName) {
-            return bean;
-        }
-
-
-        private static class EmbeddedValueResolver implements StringValueResolver {
-
-            private final ConfigurableBeanFactory beanFactory;
-
-            public EmbeddedValueResolver(ConfigurableBeanFactory beanFactory) {
-                this.beanFactory = beanFactory;
-            }
-
-            public String resolveStringValue(String strVal) {
-                return this.beanFactory.resolveEmbeddedValue(strVal);
-            }
-        }
-
-    }
-
 }

@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.support.SimpleAutowireCandidateResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.support.ConventionApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.support.AbstractContextLoader;
 import org.springframework.test.context.support.GenericXmlContextLoader;
@@ -48,6 +50,8 @@ public class ConventionContextLoader
         final ConfigurableApplicationContext parent = genericXmlContextLoader.loadContext( locations );
 
         ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory( parent );
+        AnnotationConfigUtils.registerAnnotationConfigProcessors(conventionBeanFactory);
+
 
 /*        RequiredAnnotationBeanPostProcessor requiredAnnotationBeanPostProcessor  =  new RequiredAnnotationBeanPostProcessor();
         requiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
@@ -63,8 +67,11 @@ public class ConventionContextLoader
         conventionBeanFactory.addBeanPostProcessor( autowiredAnnotationBeanPostProcessor );
 
         conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver() );
-        final GenericApplicationContext genericApplicationContext = new ConventionApplicationContext(conventionBeanFactory);
+        final ConventionApplicationContext genericApplicationContext = new ConventionApplicationContext(conventionBeanFactory);
+        AnnotationConfigUtils.registerAnnotationConfigProcessors(genericApplicationContext);
+        genericApplicationContext.prepareBeanFactory( conventionBeanFactory);
         //genericApplicationContext.refresh();
+
         return genericApplicationContext;
     }
 }

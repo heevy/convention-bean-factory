@@ -50,8 +50,7 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public <T> T getBean(Class<T> requiredType)
-            throws BeansException {
+    public <T> T getBean(Class<T> requiredType) throws BeansException {
         final Class aClass = resolveClass(requiredType);
         if (aClass == null) {
             return parent.getBean(requiredType);
@@ -60,23 +59,20 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public Object getBean(String name)
-            throws BeansException {
-        final Class<?> type = getType(name);
+    public Object getBean(String name) throws BeansException {
+        final Class<?> type = getLocalType(name);
         return type != null ? instantiate(type) : parent.getBean(name);
     }
 
     @Override
-    public <T> T getBean(String s, Class<T> tClass)
-            throws BeansException {
-        final Class<?> type = getType(s);
+    public <T> T getBean(String name, Class<T> tClass) throws BeansException {
+        final Class<?> type = getLocalType(name);
         //noinspection unchecked
-        return type != null && isTypeMatch(s, tClass) ? (T) instantiate(type) : parent.getBean(s, tClass);
+        return type != null && isTypeMatch(name, tClass) ? (T) instantiate(type) : parent.getBean(name, tClass);
     }
 
     @Override
-    public Object getBean(String s, Object... objects)
-            throws BeansException {
+    public Object getBean(String s, Object... objects) throws BeansException {
         throw new NoSuchBeanDefinitionException("Dont know");
     }
 
@@ -98,14 +94,12 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public boolean isPrototype(String s)
-            throws NoSuchBeanDefinitionException {
+    public boolean isPrototype(String s) throws NoSuchBeanDefinitionException {
         return false;
     }
 
     @Override
-    public boolean isTypeMatch(String s, Class aClass)
-            throws NoSuchBeanDefinitionException {
+    public boolean isTypeMatch(String s, Class aClass) throws NoSuchBeanDefinitionException {
         final Class aClass1 = resolveImplClass(s);
         if (aClass1 == null) {
             return parent.isTypeMatch(s, aClass);
@@ -114,17 +108,15 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public Class<?> getType(String s)
-            throws NoSuchBeanDefinitionException {
+    public Class<?> getType(String s) throws NoSuchBeanDefinitionException {
         final Class aClass = resolveImplClass(s);
-        if (aClass == null){
-            return parent.containsBean( s) ? parent.getType( s) : null;
+        if (aClass == null) {
+            return parent.containsBean(s) ? parent.getType(s) : null;
         }
         return aClass;
     }
 
-    public Class<?> getLocalType(String s)
-            throws NoSuchBeanDefinitionException {
+    public Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
         final Class aClass = resolveImplClass(s);
         return aClass;
     }
@@ -147,8 +139,7 @@ public class ConventionBeanFactory
         return beanClass.getName();
     }
 
-    private <T> T instantiate(Class aClass)
-            throws BeansException {
+    private <T> T instantiate(Class aClass) throws BeansException {
         return doGetBean(aClass.getName(), null, null, false);
     }
 
@@ -186,7 +177,6 @@ public class ConventionBeanFactory
         final Class<?> type = getType(beanName);
         return type != null;
     }
-
 
 
 }
