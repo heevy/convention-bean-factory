@@ -16,9 +16,13 @@ public class DefaultTestService2
     public TestService testService;
     public ApplicationContext applicationContext;
 
-    @Resource(name = "testResource")
     public Properties test ;
 
+
+    @Resource(name = "testResource")
+    public void setTest(Properties test) {
+        this.test = test;
+    }
 
     @Autowired
     public void setTestService(TestService testService) {

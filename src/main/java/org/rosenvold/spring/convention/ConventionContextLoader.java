@@ -22,8 +22,8 @@ import org.springframework.beans.factory.support.SimpleAutowireCandidateResolver
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.ConventionApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.support.AbstractContextLoader;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
@@ -57,20 +57,24 @@ public class ConventionContextLoader
         requiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
         conventionBeanFactory.addBeanPostProcessor(requiredAnnotationBeanPostProcessor);
   */
-        AnnotationAwareAspectJAutoProxyCreator annotationAwareAspectJAutoProxyCreator =
-            new AnnotationAwareAspectJAutoProxyCreator();
+        AnnotationAwareAspectJAutoProxyCreator annotationAwareAspectJAutoProxyCreator = new AnnotationAwareAspectJAutoProxyCreator();
         annotationAwareAspectJAutoProxyCreator.setBeanFactory( conventionBeanFactory );
         conventionBeanFactory.addBeanPostProcessor( annotationAwareAspectJAutoProxyCreator );
-        final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor =
-            new AutowiredAnnotationBeanPostProcessor();
+        final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
         autowiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory );
         conventionBeanFactory.addBeanPostProcessor( autowiredAnnotationBeanPostProcessor );
+
+        CommonAnnotationBeanPostProcessor commonAnnotationBeanPostProcessor = new CommonAnnotationBeanPostProcessor();
+        commonAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
+        conventionBeanFactory.addBeanPostProcessor(commonAnnotationBeanPostProcessor);
+
 
         conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver() );
         final ConventionApplicationContext genericApplicationContext = new ConventionApplicationContext(conventionBeanFactory);
         AnnotationConfigUtils.registerAnnotationConfigProcessors(genericApplicationContext);
         genericApplicationContext.prepareBeanFactory( conventionBeanFactory);
-        //genericApplicationContext.refresh();
+
+        genericApplicationContext.refresh();
 
         return genericApplicationContext;
     }
