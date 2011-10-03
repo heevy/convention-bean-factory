@@ -63,8 +63,8 @@ public class ConventionContextLoader
         conventionBeanFactory.addBeanPostProcessor( autowiredAnnotationBeanPostProcessor );
 
         conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver() );
-        final GenericApplicationContext genericApplicationContext = new GenericApplicationContext(conventionBeanFactory);
-        genericApplicationContext.refresh();
+        final GenericApplicationContext genericApplicationContext = new ConventionApplicationContext(conventionBeanFactory);
+        //genericApplicationContext.refresh();
         return genericApplicationContext;
     }
 }
