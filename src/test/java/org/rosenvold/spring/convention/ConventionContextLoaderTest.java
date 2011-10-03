@@ -24,6 +24,9 @@ public class ConventionContextLoaderTest {
         assertNotNull(testService2);
         assertNotNull(testService2.testService);
         assertNotNull(testService2.interfaceLessService);
+    //    assertNotNull( testService2.test);
+     //   assertEquals(2,testService2.test.size());
+
 
     }
 }
