@@ -16,69 +16,76 @@ package org.rosenvold.spring.convention;
  * limitations under the License.
  */
 
-import org.rosenvold.spring.convention.beanclassresolvers.DefaultBeanClassResolver;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConventionBeanFactory
         extends DefaultListableBeanFactory {
 
-    private final ConfigurableApplicationContext parent;
+    private final NameToClassResolver nameToClassResolver;
 
-    private final NameToClassResolver beanClassResolver;
+    private final CandidateEvaluator candidateEvaluator;
 
-    public ConventionBeanFactory(ConfigurableApplicationContext parent) {
-        super(parent);
-        this.parent = parent;
-
-        final NameToClassResolver bean = parent.getBean(NameToClassResolver.class);
-        this.beanClassResolver = bean != null ? bean : new DefaultBeanClassResolver();
-    }
-
-
-    public ConventionBeanFactory(ConfigurableApplicationContext parentBeanFactory,
-                                 NameToClassResolver beanClassResolver) {
-        super(parentBeanFactory);
-        this.parent = parentBeanFactory;
-        this.beanClassResolver = beanClassResolver;
+    public ConventionBeanFactory(NameToClassResolver beanClassResolver,
+                                 CandidateEvaluator candidateEvaluator) {
+        this.nameToClassResolver = beanClassResolver;
+        this.candidateEvaluator = candidateEvaluator;
     }
 
     @Override
     public <T> T getBean(Class<T> requiredType) throws BeansException {
-        final Class aClass = resolveClass(requiredType);
-        if (aClass == null) {
-            return parent.getBean(requiredType);
+        if (isBeanInBaseClass(requiredType)) {
+            return super.getBean(requiredType);
         }
+        final Class aClass = resolveClass(requiredType);
         return instantiate(aClass);
+    }
+
+    private <T> boolean isBeanInBaseClass(Class<T> requiredType) {
+        return super.getBeanNamesForType(requiredType).length > 0;
     }
 
     @Override
     public Object getBean(String name) throws BeansException {
+        if (super.containsBeanDefinition(name)) {
+            return super.getBean(name);
+        }
         final Class<?> type = getLocalType(name);
-        return type != null ? instantiate(type) : parent.getBean(name);
+        return type != null ? instantiate(type) : null;
     }
 
     @Override
     public <T> T getBean(String name, Class<T> tClass) throws BeansException {
+        if (super.containsBeanDefinition(name)) {
+            return super.getBean(name, tClass);
+        }
         final Class<?> type = getLocalType(name);
         //noinspection unchecked
-        return type != null && isTypeMatch(name, tClass) ? (T) instantiate(type) : parent.getBean(name, tClass);
+        return type != null && isTypeMatch(name, tClass) ? (T) instantiate(type) : null;
     }
 
     @Override
-    public Object getBean(String s, Object... objects) throws BeansException {
+    public Object getBean(String name, Object... objects) throws BeansException {
+        if (super.containsBeanDefinition(name)) {
+            return super.getBean(name, objects);
+        }
         throw new NoSuchBeanDefinitionException("Dont know");
     }
 
     @Override
-    public boolean containsBean(String s) {
-        final Class<?> type = getType(s);
+    public boolean containsBean(String name) {
+        if (super.containsBeanDefinition(name)) {
+            return true;
+        }
+        final Class<?> type = getType(name);
         if (type == null) {
             return false;
         }
@@ -88,47 +95,97 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public boolean isSingleton(String s)
+    public boolean isSingleton(String name)
             throws NoSuchBeanDefinitionException {
+        if (super.containsBeanDefinition(name)) {
+            return super.isSingleton(name);
+        }
         return true;
     }
 
     @Override
-    public boolean isPrototype(String s) throws NoSuchBeanDefinitionException {
-        return false;
-    }
-
-    @Override
-    public boolean isTypeMatch(String s, Class aClass) throws NoSuchBeanDefinitionException {
-        final Class aClass1 = resolveImplClass(s);
-        if (aClass1 == null) {
-            return parent.isTypeMatch(s, aClass);
+    public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+        if (super.containsBean(name)) {
+            return super.isPrototype(name);
         }
-        return aClass.isAssignableFrom(aClass1);
+        return false; // Todo: read annotation on ompl
     }
 
     @Override
-    public Class<?> getType(String s) throws NoSuchBeanDefinitionException {
-        final Class aClass = resolveImplClass(s);
+    public boolean isTypeMatch(String name, Class aClass) throws NoSuchBeanDefinitionException {
+        if (super.containsBeanDefinition(name)) {
+            return super.isTypeMatch(name, aClass);
+        }
+        final Class aClass1 = resolveImplClass(name);
+        return aClass1 != null && aClass.isAssignableFrom(aClass1);
+    }
+
+    @Override
+    public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+        if (super.containsBeanDefinition( name)){
+            return super.getType(name);
+        }
+        final Class aClass = resolveImplClass(name);
         if (aClass == null) {
-            return parent.containsBean(s) ? parent.getType(s) : null;
+            return null;
         }
         return aClass;
     }
 
-    public Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
+    private Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
         final Class aClass = resolveImplClass(s);
-        return aClass;
+        return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null;
     }
 
     @Override
-    public String[] getAliases(String s) {
+    public String[] getAliases(String name) {
+        if (super.containsBean(name)) {
+            return super.getAliases(name);
+        }
         return new String[0];
     }
 
+    @Override
+    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
+        final String[] beanNamesForType = super.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+        if (beanNamesForType.length > 0) return beanNamesForType;
+
+        final Class aClass = resolveImplClass(type.getName());
+        if (aClass != null) {
+            return new String[]{aClass.getName()};
+        }
+        return new String[]{};
+    }
+
+    @Override
+    public boolean containsBeanDefinition(String beanName) {  // LBF; local only
+        final Class<?> type = getLocalType(beanName);
+        return type != null;
+    }
+
+
+/*    @Override
+    public boolean containsSingleton(String beanName) {
+        final Class<?> type = getType(beanName);
+        return type != null;
+    }
+  */
+
+
+    /*private Class resolveImplClass(final String beanName) {
+        return nameToClassResolver.resolveBean(beanName, candidateEvaluator);
+    } */
+
+    private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
+
+    private static class CacheMiss {}
 
     private Class resolveImplClass(final String beanName) {
-        return beanClassResolver.resolveBean(beanName);
+        Class aClass = cache.get(beanName);
+        if (aClass != null && !CacheMiss.class.equals(aClass )) return aClass;
+        aClass = nameToClassResolver.resolveBean(beanName, candidateEvaluator);
+        cache.put( beanName, aClass != null ? aClass : CacheMiss.class);
+        return aClass;
     }
 
     private Class resolveClass(final Class beanClass) {
@@ -143,18 +200,11 @@ public class ConventionBeanFactory
         return doGetBean(aClass.getName(), null, null, false);
     }
 
-    @Override
-    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
-        final Class aClass = resolveImplClass(type.getName());
-        if (aClass != null) {
-            return new String[]{aClass.getName()};
-        }
-        return new String[]{};
-    }
 
     @Override
     protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName)
             throws BeansException {
+        if (super.containsBeanDefinition(beanName)) return super.getMergedLocalBeanDefinition(beanName);
         final Class<?> type = getType(beanName);
         if (type != null) {
             final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
@@ -166,17 +216,14 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public boolean containsBeanDefinition(String beanName) {  // LBF; local only
-        final Class<?> type = getLocalType(beanName);
-        return type != null;
-    }
-
-
-    @Override
-    public boolean containsSingleton(String beanName) {
+    public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+        if (super.containsBeanDefinition(beanName)) {
+            return super.getBeanDefinition(beanName);
+        }
         final Class<?> type = getType(beanName);
-        return type != null;
+        final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
+        rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+        return rootBeanDefinition;
     }
-
 
 }

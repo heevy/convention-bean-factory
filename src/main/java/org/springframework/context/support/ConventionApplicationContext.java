@@ -1,21 +1,12 @@
 package org.springframework.context.support;
 
 import org.rosenvold.spring.convention.ConventionBeanFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.*;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.StringValueResolver;
-
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * @author <a href="mailto:kristian@zenior.no">Kristian Rosenvold</a>
@@ -25,7 +16,8 @@ public class ConventionApplicationContext extends GenericApplicationContext {
         super(conventionBeanFactory);
     }
 
-    public void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+
+    public void prepareBxxeanFactory(ConfigurableListableBeanFactory beanFactory) {
         // Tell the internal bean factory to use the context's class loader etc.
         beanFactory.setBeanClassLoader(getClassLoader());
         beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());

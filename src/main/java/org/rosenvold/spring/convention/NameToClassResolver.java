@@ -29,8 +29,9 @@ public interface NameToClassResolver {
      *             If this points to a class, it should be used as a bean directly.
      *             If it points to an interface, the implementation should
      *             decide how to map this to an implementation class.
+     * @param candidateEvaluator
      * @return A class or null if no resolution can be established. Convention will
      *         pass unresolvable names onto the parent context.
      */
-    Class resolveBean(String name);
+    Class resolveBean(String name, final CandidateEvaluator candidateEvaluator);
 }

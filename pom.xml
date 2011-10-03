@@ -17,6 +17,12 @@
     <packaging>jar</packaging>
     <version>0.1-SNAPSHOT</version>
 
+    <scm>
+      <connection>scm:git:https://github.com/krosenvold/convention-bean-factory</connection>
+      <developerConnection>scm:git:ssh://git@github.com/krosenvold/convention-bean-factory.git</developerConnection>
+      <url>http://github.com/krosenvold/convention-bean-factory</url>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>

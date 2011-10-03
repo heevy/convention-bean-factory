@@ -16,66 +16,84 @@ package org.rosenvold.spring.convention;
  * limitations under the License.
  */
 
-import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
-import org.springframework.beans.factory.support.SimpleAutowireCandidateResolver;
-import org.springframework.context.ApplicationContext;
+import org.rosenvold.spring.convention.beanclassresolvers.DefaultBeanClassResolver;
+import org.rosenvold.spring.convention.candidateevaluators.DefaultCandidateEvaluator;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
-import org.springframework.context.support.ConventionApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.support.AbstractContextLoader;
-import org.springframework.test.context.support.GenericXmlContextLoader;
 
 /**
  * @author Kristian Rosenvold
  */
 public class ConventionContextLoader
-    extends AbstractContextLoader
-{
-
-    private final GenericXmlContextLoader genericXmlContextLoader = new GenericXmlContextLoader();
+        extends AbstractContextLoader {
+    public Class<? extends CandidateEvaluator> candidateEvaluator = DefaultCandidateEvaluator.class;
+    public Class<? extends NameToClassResolver> nameToClassResolver = DefaultBeanClassResolver.class;
 
 
     @Override
-    protected String getResourceSuffix()
-    {
+    protected String getResourceSuffix() {
         return "-convention";
     }
 
-    public ApplicationContext loadContext( String... locations )
-        throws Exception
-    {
-
-        final ConfigurableApplicationContext parent = genericXmlContextLoader.loadContext( locations );
-
-        ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory( parent );
-        AnnotationConfigUtils.registerAnnotationConfigProcessors(conventionBeanFactory);
-
-
-/*        RequiredAnnotationBeanPostProcessor requiredAnnotationBeanPostProcessor  =  new RequiredAnnotationBeanPostProcessor();
-        requiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
-        conventionBeanFactory.addBeanPostProcessor(requiredAnnotationBeanPostProcessor);
-  */
-        AnnotationAwareAspectJAutoProxyCreator annotationAwareAspectJAutoProxyCreator = new AnnotationAwareAspectJAutoProxyCreator();
-        annotationAwareAspectJAutoProxyCreator.setBeanFactory( conventionBeanFactory );
-        conventionBeanFactory.addBeanPostProcessor( annotationAwareAspectJAutoProxyCreator );
-        final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
-        autowiredAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory );
-        conventionBeanFactory.addBeanPostProcessor( autowiredAnnotationBeanPostProcessor );
-
-        CommonAnnotationBeanPostProcessor commonAnnotationBeanPostProcessor = new CommonAnnotationBeanPostProcessor();
-        commonAnnotationBeanPostProcessor.setBeanFactory( conventionBeanFactory);
-        conventionBeanFactory.addBeanPostProcessor(commonAnnotationBeanPostProcessor);
-
-
-        conventionBeanFactory.setAutowireCandidateResolver( new SimpleAutowireCandidateResolver() );
-        final ConventionApplicationContext genericApplicationContext = new ConventionApplicationContext(conventionBeanFactory);
-        AnnotationConfigUtils.registerAnnotationConfigProcessors(genericApplicationContext);
-        genericApplicationContext.prepareBeanFactory( conventionBeanFactory);
-
-        genericApplicationContext.refresh();
-
-        return genericApplicationContext;
+    protected String[] modifyLocations(Class<?> clazz, String... locations) {
+        final ConventionConfiguration annotation = clazz.getAnnotation(ConventionConfiguration.class);
+        if (annotation != null ){
+        candidateEvaluator = annotation.candidateEvaluator();
+        nameToClassResolver = annotation.nameToClassResolver();
+        }
+        return locations;
     }
+
+    public final ConfigurableApplicationContext loadContext(String... locations) throws Exception {
+        ConventionBeanFactory conventionBeanFactory = new ConventionBeanFactory(createNameToClassResolver(), createCandidateEvaluator());
+        GenericApplicationContext context = new GenericApplicationContext(conventionBeanFactory);
+        prepareContext(context);
+        customizeBeanFactory(context.getDefaultListableBeanFactory());
+        createBeanDefinitionReader(context).loadBeanDefinitions(locations);
+        AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+        customizeContext(context);
+        context.refresh();
+        context.registerShutdownHook();
+        return context;
+    }
+
+    private NameToClassResolver createNameToClassResolver(){
+        try {
+            return nameToClassResolver.newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        }  catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CandidateEvaluator createCandidateEvaluator(){
+        try {
+            return candidateEvaluator.newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        }  catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void prepareContext(GenericApplicationContext context) {
+    }
+
+    protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+    }
+
+    protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
+        return new XmlBeanDefinitionReader(context);
+    }
+
+    protected void customizeContext(GenericApplicationContext context) {
+    }
+
+
 }

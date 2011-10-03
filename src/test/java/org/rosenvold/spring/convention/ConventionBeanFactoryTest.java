@@ -18,6 +18,7 @@ package org.rosenvold.spring.convention;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.rosenvold.spring.convention.candidateevaluators.DefaultCandidateEvaluator;
 import org.rosenvold.spring.convention.testclasses.TestBeanClassResolver;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -30,8 +31,9 @@ import static junit.framework.Assert.*;
  */
 public class ConventionBeanFactoryTest {
     ConfigurableApplicationContext  parent = new GenericApplicationContext();
+    CandidateEvaluator candidateEvaluator = new DefaultCandidateEvaluator();
     private final ConventionBeanFactory conventionBeanFactory =
-            new ConventionBeanFactory(parent, new TestBeanClassResolver());
+            new ConventionBeanFactory(new TestBeanClassResolver(), candidateEvaluator);
 
     @Test
     public void containsBean()

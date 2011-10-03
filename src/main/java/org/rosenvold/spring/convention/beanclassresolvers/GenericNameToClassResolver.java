@@ -10,17 +10,15 @@ import java.util.logging.Logger;
 /**
  * @author Kristian Rosenvold
  */
-public class GenericBeanClassResolver implements NameToClassResolver {
-    private final CandidateEvaluator candidateEvaluator;
+public class GenericNameToClassResolver implements NameToClassResolver {
     private final InterfaceToImplementationMapper[] mappers;
 
-    Logger logger = Logger.getLogger(GenericBeanClassResolver.class.getName());
-    public GenericBeanClassResolver(CandidateEvaluator candidateEvaluator, InterfaceToImplementationMapper... mappers) {
-        this.candidateEvaluator = candidateEvaluator;
+    Logger logger = Logger.getLogger(GenericNameToClassResolver.class.getName());
+    public GenericNameToClassResolver(InterfaceToImplementationMapper... mappers) {
         this.mappers = mappers;
     }
 
-    public Class resolveBean(String name) {
+    public Class resolveBean(String name, final CandidateEvaluator candidateEvaluator) {
         final Class aClass = resolveClass(name);
         if (aClass != null && aClass.isInterface()) {
             final int mapperCount = mappers.length;

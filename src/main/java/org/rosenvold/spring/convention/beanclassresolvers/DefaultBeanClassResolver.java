@@ -8,9 +8,8 @@ import org.rosenvold.spring.convention.interfacemappers.DefaultPrefix;
 /**
  * @author Kristian Rosenvold
  */
-public class DefaultBeanClassResolver extends GenericBeanClassResolver{
-    private static final CandidateEvaluator candidateEvaluator = new DefaultCandidateEvaluator();
+public class DefaultBeanClassResolver extends GenericNameToClassResolver {
     public DefaultBeanClassResolver() {
-        super(candidateEvaluator, new DefaultPrefix(), new AdapterSuffix());
+        super(new DefaultPrefix(), new AdapterSuffix());
     }
 }

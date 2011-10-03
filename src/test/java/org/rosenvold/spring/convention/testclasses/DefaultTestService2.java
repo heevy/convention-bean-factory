@@ -13,6 +13,10 @@ import java.util.Properties;
 @Component
 public class DefaultTestService2
         implements TestService2 {
+
+    @Autowired
+    public InterfaceLessService interfaceLessService;
+
     public TestService testService;
     public ApplicationContext applicationContext;
 
@@ -34,6 +38,4 @@ public class DefaultTestService2
         this.applicationContext = applicationContext;
     }
 
-    @Autowired
-    public InterfaceLessService interfaceLessService;
 }
