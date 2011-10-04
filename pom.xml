@@ -17,20 +17,31 @@
     <version>0.1-SNAPSHOT</version>
 
     <scm>
-      <connection>scm:git:https://github.com/krosenvold/convention-bean-factory</connection>
-      <developerConnection>scm:git:ssh://git@github.com/krosenvold/convention-bean-factory.git</developerConnection>
-      <url>http://github.com/krosenvold/convention-bean-factory</url>
+        <connection>scm:git:https://github.com/krosenvold/convention-bean-factory</connection>
+        <developerConnection>scm:git:ssh://git@github.com/krosenvold/convention-bean-factory.git</developerConnection>
+        <url>http://github.com/krosenvold/convention-bean-factory</url>
     </scm>
+
+    <developers>
+        <developer>
+            <id>krosenvold</id>
+            <name>Kristian Rosenvold</name>
+            <roles>
+                <role>Owner</role>
+            </roles>
+        </developer>
+    </developers>
+
     <distributionManagement>
-         <snapshotRepository>
-             <id>sonatype-nexus-snapshots</id>
-             <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-         </snapshotRepository>
-         <repository>
-             <id>sonatype-nexus-staging</id>
-             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-         </repository>
-     </distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>
