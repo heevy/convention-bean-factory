@@ -5,8 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rosenvold.spring</groupId>
     <artifactId>convention-bean-factory</artifactId>
-    <description>A test project that automatically picks up staged versions from oss.sonatype.org
-    </description>
+    <description>A convention over configuration bean factory for spring framework</description>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
