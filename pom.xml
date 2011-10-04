@@ -15,6 +15,8 @@
     </licenses>
     <packaging>jar</packaging>
     <version>0.1-SNAPSHOT</version>
+    <url>http://github.com/krosenvold/convention-bean-factory</url>
+
 
     <scm>
         <connection>scm:git:https://github.com/krosenvold/convention-bean-factory</connection>
