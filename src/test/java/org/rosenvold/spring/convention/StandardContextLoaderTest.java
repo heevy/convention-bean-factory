@@ -33,7 +33,7 @@ public class StandardContextLoaderTest {
 
         ListableBeanFactory listableBeanFactory = applicationContext;
         for (String bean : listableBeanFactory.getBeanDefinitionNames()) {
-            System.out.println("bean = " + bean + listableBeanFactory.getBean( bean).getClass().getName());
+        //    System.out.println("bean = " + bean + listableBeanFactory.getBean( bean).getClass().getName());
         }
 
     }

@@ -21,9 +21,9 @@ public class ConventionContextLoaderTest {
                 conventionContextLoader.loadContext("classpath:applicationContext-test.xml");
 
         ListableBeanFactory listableBeanFactory = applicationContext;
-        for (String bean : listableBeanFactory.getBeanDefinitionNames()) {
-            System.out.println("vbean = " + bean + listableBeanFactory.getBean( bean).getClass().getName());
-        }
+//        for (String bean : listableBeanFactory.getBeanDefinitionNames()) {
+//            System.out.println("vbean = " + bean + listableBeanFactory.getBean( bean).getClass().getName());
+//        }
 
         TestService testService = (TestService) applicationContext.getBean("fud");
         assertNotNull(testService);
