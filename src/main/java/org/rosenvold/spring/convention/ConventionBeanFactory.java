@@ -46,7 +46,7 @@ public class ConventionBeanFactory
             return super.getBean(requiredType);
         }
         final Class aClass = resolveClass(requiredType);
-        return instantiate(aClass);
+        return (T) instantiate(aClass);
     }
 
     private <T> boolean isBeanInBaseClass(Class<T> requiredType) {
@@ -196,7 +196,7 @@ public class ConventionBeanFactory
         return beanClass.getName();
     }
 
-    private <T> T instantiate(Class aClass) throws BeansException {
+    private Object instantiate(Class aClass) throws BeansException {
         return doGetBean(aClass.getName(), null, null, false);
     }
 
