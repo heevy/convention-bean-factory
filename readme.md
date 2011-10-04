@@ -48,11 +48,12 @@ Add the following to your pom to download from central:</p>
 
 
 1. Change a context loader.</p>
+
 Change your context loader to org.rosenvold.spring.convention.ConventionContextLoader (or extend it if you already have your own).</p>
 
     @RunWith(SpringJUnit4ClassRunner.class)
     @ContextConfiguration(locations = {
-       "/applicationContext.xml"
+    "/applicationContext.xml"
     }, loader = org.rosenvold.spring.convention.ConventionContextLoader.class)
     @ConventionConfiguration(candidateEvaluator = DefaultCandidateEvaluator.class, nameToClassResolver = DefaultBeanClassResolver.class)
     public class MyTestClass{
