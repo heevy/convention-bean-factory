@@ -31,7 +31,6 @@ public class StubSuffix implements InterfaceToImplementationMapper {
         this.packageManipulator = packageManipulator;
     }
 
-    @Override
     public String getBeanClassName(Class aClass) {
         String name = packageManipulator != null ? packageManipulator.getRemappedPackageName( aClass.getName()) : aClass.getName();
         return name + "Stub";

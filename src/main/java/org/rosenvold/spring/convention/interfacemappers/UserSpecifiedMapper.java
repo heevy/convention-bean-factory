@@ -20,7 +20,6 @@ public class UserSpecifiedMapper implements InterfaceToImplementationMapper {
         return put( interfaceClass.getName(), beanClass.getName());
     }
 
-    @Override
     public String getBeanClassName(Class aClass) {
         return interfaceToImplementations.get( aClass.getName());
     }
