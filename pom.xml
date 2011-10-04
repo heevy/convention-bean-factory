@@ -21,6 +21,16 @@
       <developerConnection>scm:git:ssh://git@github.com/krosenvold/convention-bean-factory.git</developerConnection>
       <url>http://github.com/krosenvold/convention-bean-factory</url>
     </scm>
+    <distributionManagement>
+         <snapshotRepository>
+             <id>sonatype-nexus-snapshots</id>
+             <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+         </snapshotRepository>
+         <repository>
+             <id>sonatype-nexus-staging</id>
+             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+         </repository>
+     </distributionManagement>
 
     <build>
         <plugins>
