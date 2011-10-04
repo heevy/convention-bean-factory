@@ -47,7 +47,7 @@ Add the following to your pom to download from central:</p>
      <dependency>
 
 
-1. Change a context loader.</p>
+* Change a context loader.</p>
 
 Change your context loader to org.rosenvold.spring.convention.ConventionContextLoader (or extend it if you already have your own).</p>
 
@@ -65,7 +65,7 @@ the DefaultBeanClassResolver looks for implementation classes that are interface
 
 You can make your own strategy as described in the next step.
 
-2. Implement a naming strategy:</p>
+* Implement a naming strategy:</p>
 
 You can make your own custom strategies for mapping interfaces->implementations, as show below.
 
@@ -80,8 +80,9 @@ package.
 You can also extend the criteria for accepting a class as a bean (the candidateEvaluator) by making your own implementation
 of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 
-3. Trim your old context. You might want to consider disabling all kinds of component-scanning, and make
+* Trim your old context. You might want to consider disabling all kinds of component-scanning, and make
         convention pick it up instead.</p>
+* Trimming your context is vital to making things start faster
 
 
 <h1>Known limitations</h1>
@@ -90,4 +91,4 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 - convention is not picky about deciding to use /anything/ satisfying a candidateEvaluator as a bean.
 - Something like 30% slower than regular spring if the entire context is loaded anyway. This will improve in future versions.
 
-*Submit patches with testscases, no testcase no can do*
+*Submit pull-requests with testscases, no testcase no can do*
