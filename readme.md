@@ -24,11 +24,17 @@ each bean upon request, effectively reconstructing the bean-definition every tim
 The "traditional" context has precedence over the "convention" context, meaning
 convention will not scan for beans that are traditionally defined.
 
+
 <h3 style="color:red">
-Convention is totally alpha, as can be seen from the crappy design of this page. Don't assume anything works.
-Don't use this unless you're comfortable with debugging open source code. Submit pull requests instead of whining
- if something doesn't work
+Convention is totally alpha. Don't use this unless you're comfortable with debugging open source code. Submit pull requests instead of whining
+ if something doesn't work.
 </h3>
+
+Convention is designed as an efficient replacement for component-scan based contexts,
+and can be intermingled in the same configuration: Run convention with your tests
+and run regular component-scan in your production environment. If the entire context is
+always loaded anyway, regular spring is still a bit faster.
+
 
 <h2>Using it</h2>
 
