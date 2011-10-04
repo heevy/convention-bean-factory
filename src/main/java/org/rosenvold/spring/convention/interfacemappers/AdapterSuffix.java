@@ -22,7 +22,6 @@ import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
  */
 public class AdapterSuffix implements InterfaceToImplementationMapper {
 
-    @Override
     public String getBeanClassName(Class aClass) {
         return aClass.getName() + "Adapter";
     }

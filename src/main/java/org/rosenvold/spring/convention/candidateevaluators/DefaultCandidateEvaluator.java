@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
  * @author Kristian Rosenvold
  */
 public class DefaultCandidateEvaluator implements CandidateEvaluator {
-    @Override
     public boolean isBean(Class prospect) {
         //noinspection unchecked
         return prospect.isAnnotationPresent(Repository.class) ||
