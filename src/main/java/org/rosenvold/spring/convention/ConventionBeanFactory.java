@@ -159,6 +159,9 @@ public class ConventionBeanFactory
 
     @Override
     public boolean containsBeanDefinition(String beanName) {  // LBF; local only
+        if (super.containsBeanDefinition(beanName)){
+            return true;
+        }
         final Class<?> type = getLocalType(beanName);
         return type != null;
     }
