@@ -41,16 +41,25 @@ public class ConventionBeanFactory
     }
 
     @Override
+    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
+        final String[] beanNamesForType = super.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+        if (beanNamesForType.length > 0) return beanNamesForType;
+
+        final Class aClass = resolveImplClass(type.getName());
+        if (aClass != null) {
+            return new String[]{aClass.getName()};
+        }
+        return new String[]{};
+    }
+
+    @Override
     public <T> T getBean(Class<T> requiredType) throws BeansException {
         if (isBeanInBaseClass(requiredType)) {
             return super.getBean(requiredType);
         }
         final Class aClass = resolveClass(requiredType);
+        //noinspection unchecked
         return (T) instantiate(aClass);
-    }
-
-    private <T> boolean isBeanInBaseClass(Class<T> requiredType) {
-        return super.getBeanNamesForType(requiredType).length > 0;
     }
 
     @Override
@@ -97,6 +106,7 @@ public class ConventionBeanFactory
     @Override
     public boolean isSingleton(String name)
             throws NoSuchBeanDefinitionException {
+        //noinspection SimplifiableIfStatement
         if (super.containsBeanDefinition(name)) {
             return super.isSingleton(name);
         }
@@ -105,6 +115,7 @@ public class ConventionBeanFactory
 
     @Override
     public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+        //noinspection SimplifiableIfStatement
         if (super.containsBean(name)) {
             return super.isPrototype(name);
         }
@@ -132,10 +143,6 @@ public class ConventionBeanFactory
         return aClass;
     }
 
-    private Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
-        final Class aClass = resolveImplClass(s);
-        return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null;
-    }
 
     @Override
     public String[] getAliases(String name) {
@@ -145,17 +152,6 @@ public class ConventionBeanFactory
         return new String[0];
     }
 
-    @Override
-    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
-        final String[] beanNamesForType = super.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
-        if (beanNamesForType.length > 0) return beanNamesForType;
-
-        final Class aClass = resolveImplClass(type.getName());
-        if (aClass != null) {
-            return new String[]{aClass.getName()};
-        }
-        return new String[]{};
-    }
 
     @Override
     public boolean containsBeanDefinition(String beanName) {  // LBF; local only
@@ -164,6 +160,11 @@ public class ConventionBeanFactory
         }
         final Class<?> type = getLocalType(beanName);
         return type != null;
+    }
+
+    private Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
+        final Class aClass = resolveImplClass(s);
+        return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null;
     }
 
 
@@ -207,10 +208,12 @@ public class ConventionBeanFactory
     @Override
     protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName)
             throws BeansException {
-        if (super.containsBeanDefinition(beanName)) return super.getMergedLocalBeanDefinition(beanName);
+        if (super.containsBeanDefinition(beanName)) {
+            return super.getMergedLocalBeanDefinition(beanName);
+        }
         final Class<?> type = getType(beanName);
         if (type != null) {
-            final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
+            @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
             rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
             return rootBeanDefinition;
         }
@@ -224,9 +227,14 @@ public class ConventionBeanFactory
             return super.getBeanDefinition(beanName);
         }
         final Class<?> type = getType(beanName);
-        final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
+        @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
         rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
         return rootBeanDefinition;
     }
+
+    private <T> boolean isBeanInBaseClass(Class<T> requiredType) {
+        return super.getBeanNamesForType(requiredType).length > 0;
+    }
+
 
 }
