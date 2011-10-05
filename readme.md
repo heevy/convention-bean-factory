@@ -92,3 +92,6 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 - Something like 30% slower than regular spring if the entire context is loaded anyway. This will improve in future versions.
 
 *Submit pull-requests with testscases, no testcase no can do*
+
+<h1>Community</h1>
+Join the mailing list at https://groups.google.com/group/convention-bean-factory
