@@ -11,3 +11,5 @@
 target/
 *.orig
 .idea
+pom.xml.releaseBackup
+release.properties
