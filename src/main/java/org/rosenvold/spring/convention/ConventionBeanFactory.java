@@ -33,6 +33,7 @@ public class ConventionBeanFactory
     private final NameToClassResolver nameToClassResolver;
 
     private final CandidateEvaluator candidateEvaluator;
+    private final String[] nothing = new String[]{};
 
     public ConventionBeanFactory(NameToClassResolver beanClassResolver,
                                  CandidateEvaluator candidateEvaluator) {
@@ -42,24 +43,40 @@ public class ConventionBeanFactory
 
     @Override
     public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
-        final String[] beanNamesForType = super.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
-        if (beanNamesForType.length > 0) return beanNamesForType;
+        final Class cacheEntry = getCacheEntry(type);
+        if (cacheEntry == null) {
+            final String[] beanNamesForType = super.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+            if (beanNamesForType.length > 0) return beanNamesForType;
 
-        final Class aClass = resolveImplClass(type.getName());
-        if (aClass != null) {
-            return new String[]{aClass.getName()};
+            final Class aClass = resolveImplClass(type.getName());
+            if (aClass != null) {
+                return new String[]{aClass.getName()};
+            }
+            return new String[]{};
+        } else {
+            if (isCacheMiss(cacheEntry)) {
+                return nothing;
+            } else {
+                return new String[]{cacheEntry.getName()};
+            }
+
         }
-        return new String[]{};
     }
 
     @Override
     public <T> T getBean(Class<T> requiredType) throws BeansException {
-        if (isBeanInBaseClass(requiredType)) {
-            return super.getBean(requiredType);
+        final Class cacheEntry = getCacheEntry(requiredType);
+        if (cacheEntry == null) {
+            if (super.getBeanNamesForType(requiredType).length > 0) {
+                return super.getBean(requiredType);
+            }
+            final Class aClass = resolveClass(requiredType);
+            //noinspection unchecked
+            return (T) instantiate(aClass);
+        } else {
+            //noinspection unchecked
+            return isCacheMiss(cacheEntry) ? null : (T) instantiate(cacheEntry);
         }
-        final Class aClass = resolveClass(requiredType);
-        //noinspection unchecked
-        return (T) instantiate(aClass);
     }
 
     @Override
@@ -133,7 +150,7 @@ public class ConventionBeanFactory
 
     @Override
     public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
-        if (super.containsBeanDefinition( name)){
+        if (super.containsBeanDefinition(name)) {
             return super.getType(name);
         }
         final Class aClass = resolveImplClass(name);
@@ -155,7 +172,7 @@ public class ConventionBeanFactory
 
     @Override
     public boolean containsBeanDefinition(String beanName) {  // LBF; local only
-        if (super.containsBeanDefinition(beanName)){
+        if (super.containsBeanDefinition(beanName)) {
             return true;
         }
         final Class<?> type = getLocalType(beanName);
@@ -182,14 +199,23 @@ public class ConventionBeanFactory
 
     private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
 
-    private static class CacheMiss {}
+    private static class CacheMiss {
+    }
 
     private Class resolveImplClass(final String beanName) {
         Class aClass = cache.get(beanName);
-        if (aClass != null && !CacheMiss.class.equals(aClass )) return aClass;
+        if (aClass != null && !CacheMiss.class.equals(aClass)) return aClass;
         aClass = nameToClassResolver.resolveBean(beanName, candidateEvaluator);
-        cache.put( beanName, aClass != null ? aClass : CacheMiss.class);
+        cache.put(beanName, aClass != null ? aClass : CacheMiss.class);
         return aClass;
+    }
+
+    private Class getCacheEntry(Class key) {
+        return cache.get(beanNameFromClass(key));
+    }
+
+    private boolean isCacheMiss(Class cacheResult) {
+        return CacheMiss.class.equals(cacheResult);
     }
 
     private Class resolveClass(final Class beanClass) {
@@ -230,10 +256,6 @@ public class ConventionBeanFactory
         @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
         rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
         return rootBeanDefinition;
-    }
-
-    private <T> boolean isBeanInBaseClass(Class<T> requiredType) {
-        return super.getBeanNamesForType(requiredType).length > 0;
     }
 
 

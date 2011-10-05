@@ -4,7 +4,6 @@ import org.rosenvold.spring.convention.CandidateEvaluator;
 import org.rosenvold.spring.convention.InterfaceToImplementationMapper;
 import org.rosenvold.spring.convention.NameToClassResolver;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -30,7 +29,7 @@ public class GenericNameToClassResolver implements NameToClassResolver {
                     if (prospect != null && candidateEvaluator.isBean(prospect)) return prospect;
                 }
             }
-            logger.log(Level.INFO, "No resolution for " + name);
+            // logger.log(Level.INFO, "No resolution for " + name);
             return null;
         }
         //logger.log(Level.INFO, "Class resolution for " + name);
