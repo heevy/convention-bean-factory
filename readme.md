@@ -32,8 +32,18 @@ Convention is totally alpha. Don't use this unless you're comfortable with debug
 
 Convention is designed as an efficient replacement for component-scan based contexts,
 and can be intermingled in the same configuration: Run convention with your tests
-and run regular component-scan in your production environment. If the entire context is
-always loaded anyway, regular spring is still a bit faster.
+and run regular component-scan in your production environment. Convention is normally
+faster than regular spring contexts.
+
+
+<h2>Changelog</h2>
+
+0.2:
+   scope proxies now work properly.
+   improved performance
+
+0.1
+   First release
 
 
 <h2>Using it</h2>
@@ -43,7 +53,7 @@ Add the following to your pom to download from central:</p>
      <dependency>
          <groupId>org.rosenvold.spring</groupId>
          <artifactId>convention-bean-factory</artifactId>
-         <version>0.1</version>
+         <version>0.2</version>
      <dependency>
 
 
@@ -86,10 +96,10 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 
 
 <h1>Known limitations</h1>
-- proptotype scope does probably not work for convention beans in 0.1
+- proptotype scope does probably not work for convention beans in 0.2
   (Works for beans defined in traditional modes)
 - convention is not picky about deciding to use /anything/ satisfying a candidateEvaluator as a bean.
-- Something like 30% slower than regular spring if the entire context is loaded anyway. This will improve in future versions.
+- AOP largely untested
 
 *Submit pull-requests with testscases, no testcase no can do*
 
