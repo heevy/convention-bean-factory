@@ -126,6 +126,7 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
   (Works for beans defined in traditional modes)
 - convention is not picky about deciding to use /anything/ satisfying a candidateEvaluator as a bean.
 - AOP largely untested
+- Convention does not handle wiring of abstract classes (should be easy to fix).
 
 *Submit pull-requests with testscases, no testcase no can do*
 
