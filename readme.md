@@ -28,7 +28,7 @@ can /reference/ a traditional bean and vice versa)
 
 
 <h3 style="color:red">
-Convention is totally alpha. Don't use this unless you're comfortable with debugging open source code. Submit pull requests instead of whining
+Convention is alpha. Don't use this unless you're comfortable with debugging open source code. Submit pull requests instead of whining
  if something doesn't work.
 </h3>
 
@@ -81,10 +81,14 @@ You can make your own strategy as described in the next step.
 
 You can make your own custom strategies for mapping interfaces->implementations, as show below.
 
-    public class DefaultBeanClassResolver extends GenericNameToClassResolver {
-    public DefaultBeanClassResolver() {
-        super(new DefaultPrefix(), new AdapterSuffix());
+    public class MyBeanClassResolver extends GenericNameToClassResolver {
+      private static final PackageManipulator packageManipulator =  PackageManipulator.createFindReplace("myapp.integration", "myapp.stub.integration");
+      public MyBeanClassResolver() {
+          super(new HardCodedMappings(), new StubSuffix(), new StubSuffix(packageManipulator), new DefaultPrefix(), new ImplSuffix());
+      }
     }
+
+This mapping would prefer stub versions over "default" versions.
 
 Look at the source code in package org.rosenvold.spring.convention.interfacemappers to see how to make new prefixes/suffixes and to change the
 package.
