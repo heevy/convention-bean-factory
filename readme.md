@@ -77,12 +77,20 @@ the DefaultBeanClassResolver looks for implementation classes that are interface
 
 You can make your own strategy as described in the next step.
 
-<h3>Implement a naming strategy:</h3>
+<h3>The default nametoClassResolver</h3>
+
+DefaultBeanClassResolver implements the following mapping strategy for interfaces:
+
+com.foo.Baz looks for com.foo.DefaultBaz then com.foo.BazAdapter.
+
+
+<h3>Implement a custom nametoClassResolver</h3>
 
 You can make your own custom strategies for mapping interfaces->implementations, as show below.
 
     public class MyBeanClassResolver extends GenericNameToClassResolver {
-      private static final PackageManipulator packageManipulator =  PackageManipulator.createFindReplace("myapp.integration", "myapp.stub.integration");
+      private static final PackageManipulator packageManipulator =
+          PackageManipulator.createFindReplace("myapp.integration", "myapp.stub.integration");
       public MyBeanClassResolver() {
           super(new HardCodedMappings(), new StubSuffix(), new StubSuffix(packageManipulator), new DefaultPrefix(), new ImplSuffix());
       }
