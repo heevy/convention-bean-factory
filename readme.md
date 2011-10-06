@@ -93,6 +93,18 @@ This mapping would prefer stub versions over "default" versions.
 Look at the source code in package org.rosenvold.spring.convention.interfacemappers to see how to make new prefixes/suffixes and to change the
 package.
 
+<h3>Hard coded mappings</h3>
+If you just want to test the stuff and don't want to move all the classes until you're convinced, you may make a file of
+hard-coded mappings:
+
+    public class HardCodedMappings extends  UserSpecifiedMapper {
+       public HardCodedMappings() {
+         put("com.xyz.Myif", "com.xyz.fud.MyIfImpl");
+         put("com.xyz.OtherFud", "com.xyz.fud.FudFudImpl");
+       }
+    }
+
+<h3>Determining if the resolved class is usabel as a bean or not</h3>
 You can also extend the criteria for accepting a class as a bean (the candidateEvaluator) by making your own implementation
 of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 
