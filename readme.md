@@ -38,12 +38,12 @@ faster than regular spring contexts.
 
 <h2>Changelog</h2>
 
-0.2:
-   scope proxies now work properly.
-   improved performance
+0.2: <p/>
+   scope proxies now work properly.<p/>
+   improved performance<p/>
 
-0.1
-   First release
+0.1 <p/>
+   First release <p/>
 
 
 <h2>Using it</h2>
@@ -57,7 +57,7 @@ Add the following to your pom to download from central:</p>
      <dependency>
 
 
-* Change a context loader.</p>
+<h3>Change a context loader.</h3>
 
 Change your context loader to org.rosenvold.spring.convention.ConventionContextLoader (or extend it if you already have your own).</p>
 
@@ -75,7 +75,7 @@ the DefaultBeanClassResolver looks for implementation classes that are interface
 
 You can make your own strategy as described in the next step.
 
-* Implement a naming strategy:</p>
+<h3>Implement a naming strategy:</h3>
 
 You can make your own custom strategies for mapping interfaces->implementations, as show below.
 
