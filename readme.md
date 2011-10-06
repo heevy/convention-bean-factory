@@ -22,7 +22,9 @@ to keep this part lean.
 In convention mode there is no "list of beans" but instead resolves
 each bean upon request, effectively reconstructing the bean-definition every time<p/>
 The "traditional" context has precedence over the "convention" context, meaning
-convention will not scan for beans that are traditionally defined.
+convention will not scan for beans that are traditionally defined. A single interface/bean
+must /either/ be defined in traditional manner /or/ in convention mode (but a convention based bean
+can /reference/ a traditional bean and vice versa)
 
 
 <h3 style="color:red">
