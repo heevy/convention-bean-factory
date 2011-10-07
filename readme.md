@@ -41,6 +41,10 @@ faster than regular spring contexts.
 
 <h2>Changelog</h2>
 
+0.3 <p/>
+  Prototype scope fixed<p/>
+  Version 0.3 is feature complete.
+
 0.2: <p/>
    scope proxies now work properly.<p/>
    AOP works, but remember that convention does not pick up your @Aspect classes automatically
@@ -124,10 +128,9 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 
 
 <h1>Known limitations</h1>
-- proptotype scope does probably not work for convention beans in 0.2
-  (Works for beans defined in traditional modes)
 - convention is not picky about deciding to use /anything/ satisfying a candidateEvaluator as a bean.
 - Convention does not handle wiring of abstract classes (should be easy to fix).
+- Aspect implementations must be defined traditionally
 
 *Submit pull-requests with testscases, no testcase no can do*
 

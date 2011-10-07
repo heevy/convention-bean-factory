@@ -40,10 +40,17 @@ public class PrototypeTest
     }
 
     @Test
-    public void testLoadContext()
+    public void testConventionScannedByName()
             throws Exception {
         final PrototypeScopedAnnotated bean1 = (PrototypeScopedAnnotated) applicationContext.getBean( "org.rosenvold.spring.convention.testclasses.PrototypeScopedAnnotated" );
         final PrototypeScopedAnnotated bean2 = (PrototypeScopedAnnotated) applicationContext.getBean( "org.rosenvold.spring.convention.testclasses.PrototypeScopedAnnotated" );
+        assertNotSame( bean1, bean2 );
+    }
+    @Test
+    public void testConventionScannedByType()
+            throws Exception {
+        final PrototypeScopedAnnotated bean1 = applicationContext.getBean( PrototypeScopedAnnotated.class );
+        final PrototypeScopedAnnotated bean2 = applicationContext.getBean( PrototypeScopedAnnotated.class );
         assertNotSame( bean1, bean2 );
     }
 
