@@ -38,10 +38,12 @@ and run regular component-scan in your production environment. Convention is nor
 faster than regular spring contexts.
 
 
+
 <h2>Changelog</h2>
 
 0.2: <p/>
    scope proxies now work properly.<p/>
+   AOP works, but remember that convention does not pick up your @Aspect classes automatically
    improved performance<p/>
 
 0.1 <p/>
@@ -125,7 +127,6 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 - proptotype scope does probably not work for convention beans in 0.2
   (Works for beans defined in traditional modes)
 - convention is not picky about deciding to use /anything/ satisfying a candidateEvaluator as a bean.
-- AOP largely untested
 - Convention does not handle wiring of abstract classes (should be easy to fix).
 
 *Submit pull-requests with testscases, no testcase no can do*
