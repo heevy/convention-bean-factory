@@ -20,8 +20,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.Scope;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -127,7 +129,8 @@ public class ConventionBeanFactory
         if (super.containsBeanDefinition(name)) {
             return super.isSingleton(name);
         }
-        return true;
+
+        return !isPrototype( getLocalType(name) );
     }
 
     @Override
@@ -136,7 +139,23 @@ public class ConventionBeanFactory
         if (super.containsBean(name)) {
             return super.isPrototype(name);
         }
-        return false; // Todo: read annotation on ompl
+        return isPrototype( getLocalType(name) );
+    }
+
+    private boolean isPrototype( Class<?> type )
+    {
+         return AbstractBeanDefinition.SCOPE_PROTOTYPE.equals( getAnnotatedScope(type));
+    }
+
+    private String getAnnotatedScope( Class<?> type )
+    {
+        if (type != null){
+            final Scope annotation = type.getAnnotation( Scope.class );
+            if (annotation != null){
+                return annotation.value();
+            }
+        }
+        return AbstractBeanDefinition.SCOPE_DEFAULT;
     }
 
     @Override
@@ -185,17 +204,6 @@ public class ConventionBeanFactory
     }
 
 
-/*    @Override
-    public boolean containsSingleton(String beanName) {
-        final Class<?> type = getType(beanName);
-        return type != null;
-    }
-  */
-
-
-    /*private Class resolveImplClass(final String beanName) {
-        return nameToClassResolver.resolveBean(beanName, candidateEvaluator);
-    } */
 
     private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
 
@@ -241,6 +249,7 @@ public class ConventionBeanFactory
         if (type != null) {
             @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
             rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+            rootBeanDefinition.setScope( getAnnotatedScope( type ) );
             return rootBeanDefinition;
         }
 
@@ -255,6 +264,7 @@ public class ConventionBeanFactory
         final Class<?> type = getType(beanName);
         @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
         rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+        rootBeanDefinition.setScope( getAnnotatedScope( type ) );
         return rootBeanDefinition;
     }
 
