@@ -37,6 +37,10 @@ public class ConventionBeanFactory
     private final CandidateEvaluator candidateEvaluator;
     private final String[] nothing = new String[]{};
 
+    private final Map<Class, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<Class, BeanDefinition>();
+    private final Map<Class, RootBeanDefinition> mergedBeanDefinitions =
+            new ConcurrentHashMap<Class, RootBeanDefinition>();
+
     public ConventionBeanFactory(NameToClassResolver beanClassResolver,
                                  CandidateEvaluator candidateEvaluator) {
         this.nameToClassResolver = beanClassResolver;
@@ -247,14 +251,18 @@ public class ConventionBeanFactory
         }
         final Class<?> type = getType(beanName);
         if (type != null) {
-            @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
+            RootBeanDefinition rootBeanDefinition = mergedBeanDefinitions.get( type );
+            if (rootBeanDefinition != null) return  rootBeanDefinition;
+            rootBeanDefinition = new RootBeanDefinition(type);
             rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
             rootBeanDefinition.setScope( getAnnotatedScope( type ) );
+            mergedBeanDefinitions.put( type, rootBeanDefinition );
             return rootBeanDefinition;
         }
 
         return null;
     }
+
 
     @Override
     public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
@@ -262,10 +270,17 @@ public class ConventionBeanFactory
             return super.getBeanDefinition(beanName);
         }
         final Class<?> type = getType(beanName);
-        @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
-        rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+        return getOrCreateBeanDefinition( type );
+    }
+
+    private BeanDefinition getOrCreateBeanDefinition( Class<?> type )
+    {
+        final BeanDefinition beanDefinition = beanDefinitionMap.get( type );
+        if (beanDefinition != null) return beanDefinition;
+        final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type);
+        rootBeanDefinition.setAutowireMode( AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
         rootBeanDefinition.setScope( getAnnotatedScope( type ) );
-//       rootBeanDefinition.setLazyInit(  );
+        beanDefinitionMap.put(  type, rootBeanDefinition );
         return rootBeanDefinition;
     }
 
