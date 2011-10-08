@@ -8,8 +8,12 @@ import org.rosenvold.spring.convention.testclasses.ScopedProxy;
 import org.rosenvold.spring.convention.testclasses.TestCandidateEvaluator;
 import org.rosenvold.spring.convention.testclasses.TestnameToClassResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.security.auth.kerberos.ServicePermission;
+import java.applet.AppletContext;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -28,11 +32,14 @@ public class ScopedProxyTest {
     @SuppressWarnings({"SpringJavaAutowiringInspection"})
     @Autowired
     ScopedProxy scopedProxy;
+    @Autowired
+    ApplicationContext applicationContext;
 
     @Test
     public void testLoadContext()
             throws Exception {
         assertNotNull( scopedProxy);
         assertFalse(scopedProxy instanceof DefaultScopedProxy);
+        final ScopedProxy bean = applicationContext.getBean( ScopedProxy.class );
     }
 }

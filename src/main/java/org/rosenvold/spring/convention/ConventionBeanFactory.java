@@ -265,6 +265,7 @@ public class ConventionBeanFactory
         @SuppressWarnings({"deprecation"}) final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type, true);
         rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
         rootBeanDefinition.setScope( getAnnotatedScope( type ) );
+//       rootBeanDefinition.setLazyInit(  );
         return rootBeanDefinition;
     }
 
