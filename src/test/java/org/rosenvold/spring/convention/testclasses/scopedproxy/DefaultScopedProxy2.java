@@ -1,4 +1,4 @@
-package org.rosenvold.spring.convention.testclasses;
+package org.rosenvold.spring.convention.testclasses.scopedproxy;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;

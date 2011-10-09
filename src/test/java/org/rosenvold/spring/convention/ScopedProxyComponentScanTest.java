@@ -3,8 +3,8 @@ package org.rosenvold.spring.convention;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rosenvold.spring.convention.scope.MockSessionScopeContextLoader;
-import org.rosenvold.spring.convention.testclasses.DefaultScopedProxy2;
-import org.rosenvold.spring.convention.testclasses.ScopedProxy2;
+import org.rosenvold.spring.convention.testclasses.scopedproxy.DefaultScopedProxy2;
+import org.rosenvold.spring.convention.testclasses.scopedproxy.ScopedProxy2;
 import org.rosenvold.spring.convention.testclasses.TestCandidateEvaluator;
 import org.rosenvold.spring.convention.testclasses.TestnameToClassResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class ScopedProxyComponentScanTest
     public void testLoadContext()
             throws Exception {
         assertNotNull( scopedProxy);
-        assertFalse(scopedProxy instanceof DefaultScopedProxy2 );
+        assertFalse(scopedProxy instanceof DefaultScopedProxy2);
         final ScopedProxy2 bean = applicationContext.getBean( ScopedProxy2.class );
     }
 }

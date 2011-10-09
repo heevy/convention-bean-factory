@@ -1,4 +1,4 @@
-package org.rosenvold.spring.convention.testclasses;
+package org.rosenvold.spring.convention.testclasses.scopedproxy;
 
 /**
  * @author Kristian Rosenvold
