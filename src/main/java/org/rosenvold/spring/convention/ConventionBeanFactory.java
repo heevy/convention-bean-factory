@@ -16,14 +16,21 @@ package org.rosenvold.spring.convention;
  * limitations under the License.
  */
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationScopeMetadataResolver;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopeMetadata;
+import org.springframework.context.annotation.ScopeMetadataResolver;
+import org.springframework.context.annotation.ScopedProxyMode;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -40,6 +47,7 @@ public class ConventionBeanFactory
     private final Map<Class, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<Class, BeanDefinition>();
     private final Map<Class, RootBeanDefinition> mergedBeanDefinitions =
             new ConcurrentHashMap<Class, RootBeanDefinition>();
+    private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
     public ConventionBeanFactory(NameToClassResolver beanClassResolver,
                                  CandidateEvaluator candidateEvaluator) {
@@ -284,5 +292,24 @@ public class ConventionBeanFactory
         return rootBeanDefinition;
     }
 
+    private BeanDefinitionHolder createBeanDefinitionHolder(BeanDefinition candidate, String beanName){
+        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+        ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 
+        definitionHolder = applyScopedProxyMode( scopeMetadata, definitionHolder, this );
+        registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition() );
+        return definitionHolder;
+
+    }
+
+    static BeanDefinitionHolder applyScopedProxyMode(
+            ScopeMetadata metadata, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+
+        ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
+        if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
+            return definition;
+        }
+        boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
+        return ScopedProxyUtils.createScopedProxy( definition, registry, proxyTargetClass );
+    }
 }
