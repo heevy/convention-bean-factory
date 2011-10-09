@@ -95,21 +95,22 @@ public class ConventionBeanFactory
 
     @Override
     public Object getBean(String name) throws BeansException {
-        if (super.containsBeanDefinition(name)) {
-            return super.getBean(name);
+
+        if (!super.containsBeanDefinition(name)) {
+            final Class<?> type = getLocalType(name);
+            registerBeanByType(type);
         }
-        final Class<?> type = getLocalType(name);
-        return type != null ? instantiate(type) : null;
+        return super.getBean(name);
     }
+
 
     @Override
     public <T> T getBean(String name, Class<T> tClass) throws BeansException {
-        if (super.containsBeanDefinition(name)) {
-            return super.getBean(name, tClass);
+        if (!super.containsBeanDefinition(name)) {
+            final Class<?> type = getLocalType(name);
+            registerBeanByType(type);
         }
-        final Class<?> type = getLocalType(name);
-        //noinspection unchecked
-        return type != null && isTypeMatch(name, tClass) ? (T) instantiate(type) : null;
+        return super.getBean(name, tClass);
     }
 
     @Override
@@ -290,6 +291,13 @@ public class ConventionBeanFactory
         rootBeanDefinition.setScope( getAnnotatedScope( type ) );
         beanDefinitionMap.put(  type, rootBeanDefinition );
         return rootBeanDefinition;
+    }
+
+    private void registerBeanByType( Class<?> type )
+    {
+        if (type == null) return;
+        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition( type );
+        createBeanDefinitionHolder( orCreateBeanDefinition, type.getName() );
     }
 
     private BeanDefinitionHolder createBeanDefinitionHolder(BeanDefinition candidate, String beanName){
