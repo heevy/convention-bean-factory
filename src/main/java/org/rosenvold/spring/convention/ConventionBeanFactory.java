@@ -95,59 +95,52 @@ public class ConventionBeanFactory
     @Override
     public Object getBean(String name) throws BeansException {
 
-        setupConventionBeanIfMissing( name );
+        setupConventionBeanIfMissing(name);
         return super.getBean(name);
     }
 
 
     @Override
     public <T> T getBean(String name, Class<T> tClass) throws BeansException {
-        setupConventionBeanIfMissing( name );
+        setupConventionBeanIfMissing(name);
         return super.getBean(name, tClass);
     }
 
-    private void registerByDirectNameToClassMapping( String name )
-    {
+    private void registerByDirectNameToClassMapping(String name) {
         final Class<?> type = getLocalType(name);
         registerBeanByType(name, type);
     }
 
     @Override
     public Object getBean(String name, Object... objects) throws BeansException {
-        setupConventionBeanIfMissing( name );
+        setupConventionBeanIfMissing(name);
         return super.getBean(name, objects);
     }
 
     @Override
     public boolean containsBean(String name) {
-        setupConventionBeanIfMissing( name );
-        return super.containsBean( name );
+        setupConventionBeanIfMissing(name);
+        return super.containsBean(name);
     }
 
     @Override
     public boolean isSingleton(String name)
             throws NoSuchBeanDefinitionException {
         //noinspection SimplifiableIfStatement
-        setupConventionBeanIfMissing( name );
-        return super.isSingleton( name );
+        setupConventionBeanIfMissing(name);
+        return super.isSingleton(name);
     }
 
     @Override
     public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
-        setupConventionBeanIfMissing( name );
-        return super.isPrototype( name );
+        setupConventionBeanIfMissing(name);
+        return super.isPrototype(name);
     }
 
-    private boolean isPrototype( Class<?> type )
-    {
-         return AbstractBeanDefinition.SCOPE_PROTOTYPE.equals( getAnnotatedScope(type));
-    }
-
-    private String getAnnotatedScope( Class<?> type )
-    {
-        if (type != null){
-            final Scope annotation = type.getAnnotation( Scope.class );
-            if (annotation != null){
+    private String getAnnotatedScope(Class<?> type) {
+        if (type != null) {
+            final Scope annotation = type.getAnnotation(Scope.class);
+            if (annotation != null) {
                 return annotation.value();
             }
         }
@@ -156,42 +149,71 @@ public class ConventionBeanFactory
 
     @Override
     public boolean isTypeMatch(String name, Class aClass) throws NoSuchBeanDefinitionException {
-        setupConventionBeanIfMissing( name );
-        return super.isTypeMatch( name, aClass );
-    }
-
-    private void setupConventionBeanIfMissing( String name )
-    {
-        if (!super.containsBeanDefinition(name)) {
-            registerByDirectNameToClassMapping( name );
-        }
+        setupConventionBeanIfMissing(name);
+        return super.isTypeMatch(name, aClass);
     }
 
     @Override
     public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
-//        setupConventionBeanIfMissing( name );
-        return super.getType(  name );
+//        setupConventionBeanIfMissing( name );  Hmpf.
+        return super.getType(name);
     }
-
 
     @Override
     public String[] getAliases(String name) {
-        setupConventionBeanIfMissing( name );
-        return super.getAliases(  name );
+        setupConventionBeanIfMissing(name);
+        return super.getAliases(name);
     }
 
 
     @Override
     public boolean containsBeanDefinition(String beanName) {  // LBF; local only
-        setupConventionBeanIfMissing( beanName );
-        return super.containsBeanDefinition( beanName );
+        setupConventionBeanIfMissing(beanName);
+        return super.containsBeanDefinition(beanName);
+    }
+
+
+
+    @Override
+    protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName)
+            throws BeansException {
+        if (super.containsBeanDefinition(beanName)) {
+            return super.getMergedLocalBeanDefinition(beanName);
+        }
+        final Class<?> type = getLocalType(beanName);
+        if (type != null) {
+            RootBeanDefinition rootBeanDefinition = mergedBeanDefinitions.get(type);
+            if (rootBeanDefinition != null) return rootBeanDefinition;
+            rootBeanDefinition = new RootBeanDefinition(type);
+            rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+            rootBeanDefinition.setScope(getAnnotatedScope(type));
+            mergedBeanDefinitions.put(type, rootBeanDefinition);
+            return rootBeanDefinition;
+        }
+
+        return null;
+    }
+
+
+    @Override
+    public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+        if (super.containsBeanDefinition(beanName)) {
+            return super.getBeanDefinition(beanName);
+        }
+        final Class<?> type = getType(beanName);
+        return getOrCreateBeanDefinition(type);
+    }
+
+    private void setupConventionBeanIfMissing(String name) {
+        if (!super.containsBeanDefinition(name)) {
+            registerByDirectNameToClassMapping(name);
+        }
     }
 
     private Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
         final Class aClass = resolveImplClass(s);
         return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null;
     }
-
 
 
     private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
@@ -227,75 +249,28 @@ public class ConventionBeanFactory
         return doGetBean(aClass.getName(), null, null, false);
     }
 
-
-    @Override
-    protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName)
-            throws BeansException {
-        if (super.containsBeanDefinition(beanName)) {
-            return super.getMergedLocalBeanDefinition(beanName);
-        }
-        final Class<?> type = getLocalType( beanName );
-        if (type != null) {
-            RootBeanDefinition rootBeanDefinition = mergedBeanDefinitions.get( type );
-            if (rootBeanDefinition != null) return  rootBeanDefinition;
-            rootBeanDefinition = new RootBeanDefinition(type);
-            rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
-            rootBeanDefinition.setScope( getAnnotatedScope( type ) );
-            mergedBeanDefinitions.put( type, rootBeanDefinition );
-            return rootBeanDefinition;
-        }
-
-        return null;
-    }
-
-
-    @Override
-    public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-        if (super.containsBeanDefinition(beanName)) {
-            return super.getBeanDefinition(beanName);
-        }
-        final Class<?> type = getType(beanName);
-        return getOrCreateBeanDefinition( type );
-    }
-
-    private BeanDefinition getOrCreateBeanDefinition( Class<?> type )
-    {
-        final BeanDefinition beanDefinition = beanDefinitionMap.get( type );
+    private BeanDefinition getOrCreateBeanDefinition(Class<?> type) {
+        final BeanDefinition beanDefinition = beanDefinitionMap.get(type);
         if (beanDefinition != null) return beanDefinition;
         final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type);
-        rootBeanDefinition.setAutowireMode( AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
-        rootBeanDefinition.setScope( getAnnotatedScope( type ) );
-        beanDefinitionMap.put(  type, rootBeanDefinition );
+        rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+        rootBeanDefinition.setScope(getAnnotatedScope(type));
+        beanDefinitionMap.put(type, rootBeanDefinition);
         return rootBeanDefinition;
     }
 
-    private void registerBeanByType( Class<?> type )
-    {
+    private void registerBeanByType(String beanName, Class<?> type) {
         if (type == null) return;
-        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition( type );
-        createBeanDefinitionHolder( orCreateBeanDefinition, type.getName() );
-    }
-    private void registerBeanByType( String beanName, Class<?> type )
-    {
-        if (type == null) return;
-        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition( type );
-        createBeanDefinitionHolder( beanName, orCreateBeanDefinition );
+        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition(type);
+        createBeanDefinitionHolder(beanName, orCreateBeanDefinition);
     }
 
-    private BeanDefinitionHolder createBeanDefinitionHolder(BeanDefinition candidate, String beanName){
-        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-        ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-
-        definitionHolder = applyScopedProxyMode( scopeMetadata, definitionHolder, this );
-        registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition() );
-        return definitionHolder;
-    }
-    private BeanDefinitionHolder createBeanDefinitionHolder( String realbeanName, BeanDefinition candidate ){
+    private BeanDefinitionHolder createBeanDefinitionHolder(String realbeanName, BeanDefinition candidate) {
         BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, realbeanName);
         ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 
-        definitionHolder = applyScopedProxyMode( scopeMetadata, definitionHolder, this );
-        registerBeanDefinition(realbeanName, definitionHolder.getBeanDefinition() );
+        definitionHolder = applyScopedProxyMode(scopeMetadata, definitionHolder, this);
+        registerBeanDefinition(realbeanName, definitionHolder.getBeanDefinition());
         return definitionHolder;
     }
 
@@ -307,6 +282,6 @@ public class ConventionBeanFactory
             return definition;
         }
         boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
-        return ScopedProxyUtils.createScopedProxy( definition, registry, proxyTargetClass );
+        return ScopedProxyUtils.createScopedProxy(definition, registry, proxyTargetClass);
     }
 }
