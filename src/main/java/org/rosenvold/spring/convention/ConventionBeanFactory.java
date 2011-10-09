@@ -26,11 +26,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.annotation.AnnotationScopeMetadataResolver;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopeMetadata;
-import org.springframework.context.annotation.ScopeMetadataResolver;
-import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.context.annotation.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -255,6 +251,10 @@ public class ConventionBeanFactory
         final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type);
         rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
         rootBeanDefinition.setScope(getAnnotatedScope(type));
+        final Lazy lazy = type.getAnnotation(Lazy.class);
+        if (lazy != null){
+            rootBeanDefinition.setLazyInit(lazy.value());
+        }
         beanDefinitionMap.put(type, rootBeanDefinition);
         return rootBeanDefinition;
     }
