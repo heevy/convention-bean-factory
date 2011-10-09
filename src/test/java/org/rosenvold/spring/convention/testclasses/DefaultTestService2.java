@@ -3,6 +3,7 @@ package org.rosenvold.spring.convention.testclasses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Properties;
@@ -10,7 +11,7 @@ import java.util.Properties;
 /**
  * @author Kristian Rosenvold
  */
-@Component
+@Service
 public class DefaultTestService2
         implements TestService2 {
 

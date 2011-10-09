@@ -9,9 +9,4 @@
 
     <aop:aspectj-autoproxy proxy-target-class="false"/>
 
-    <bean id="t1" class="org.rosenvold.spring.convention.testclasses.DefaultScopedProxy" scope="session">
-        <aop:scoped-proxy proxy-target-class="false"/>
-    </bean>
-
-
 </beans>
