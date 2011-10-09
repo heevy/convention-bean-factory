@@ -96,18 +96,14 @@ public class ConventionBeanFactory
     @Override
     public Object getBean(String name) throws BeansException {
 
-        if (!super.containsBeanDefinition(name)) {
-            registerByDirectNameToClassMapping( name );
-        }
+        setupConventionBeanIfMissing( name );
         return super.getBean(name);
     }
 
 
     @Override
     public <T> T getBean(String name, Class<T> tClass) throws BeansException {
-        if (!super.containsBeanDefinition(name)) {
-            registerByDirectNameToClassMapping( name );
-        }
+        setupConventionBeanIfMissing( name );
         return super.getBean(name, tClass);
     }
 
@@ -119,44 +115,28 @@ public class ConventionBeanFactory
 
     @Override
     public Object getBean(String name, Object... objects) throws BeansException {
-        if (super.containsBeanDefinition(name)) {
-            return super.getBean(name, objects);
-        }
-        throw new NoSuchBeanDefinitionException("Dont know");
+        setupConventionBeanIfMissing( name );
+        return super.getBean(name, objects);
     }
 
     @Override
     public boolean containsBean(String name) {
-        if (super.containsBeanDefinition(name)) {
-            return true;
-        }
-        final Class<?> type = getType(name);
-        if (type == null) {
-            return false;
-        }
-        // Todo: Use CandidateEvaluator
-        final Annotation[] annotations = type.getAnnotations();
-        return annotations.length > 0;
+        setupConventionBeanIfMissing( name );
+        return super.containsBean( name );
     }
 
     @Override
     public boolean isSingleton(String name)
             throws NoSuchBeanDefinitionException {
         //noinspection SimplifiableIfStatement
-        if (super.containsBeanDefinition(name)) {
-            return super.isSingleton(name);
-        }
-
-        return !isPrototype( getLocalType(name) );
+        setupConventionBeanIfMissing( name );
+        return super.isSingleton( name );
     }
 
     @Override
     public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
-        //noinspection SimplifiableIfStatement
-        if (super.containsBean(name)) {
-            return super.isPrototype(name);
-        }
-        return isPrototype( getLocalType(name) );
+        setupConventionBeanIfMissing( name );
+        return super.isPrototype( name );
     }
 
     private boolean isPrototype( Class<?> type )
@@ -177,37 +157,34 @@ public class ConventionBeanFactory
 
     @Override
     public boolean isTypeMatch(String name, Class aClass) throws NoSuchBeanDefinitionException {
-        if (super.containsBeanDefinition(name)) {
-            return super.isTypeMatch(name, aClass);
+        setupConventionBeanIfMissing( name );
+        return super.isTypeMatch( name, aClass );
+    }
+
+    private void setupConventionBeanIfMissing( String name )
+    {
+        if (!super.containsBeanDefinition(name)) {
+            registerByDirectNameToClassMapping( name );
         }
-        final Class aClass1 = resolveImplClass(name);
-        return aClass1 != null && aClass.isAssignableFrom(aClass1);
     }
 
     @Override
     public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
-        if (super.containsBeanDefinition(name)) {
-            return super.getType(name);
-        }
-        final Class aClass = resolveImplClass(name);
-        if (aClass == null) {
-            return null;
-        }
-        return aClass;
+        setupConventionBeanIfMissing( name );
+        return super.getType(  name );
     }
 
 
     @Override
     public String[] getAliases(String name) {
-        if (super.containsBean(name)) {
-            return super.getAliases(name);
-        }
-        return new String[0];
+        setupConventionBeanIfMissing( name );
+        return super.getAliases(  name );
     }
 
 
     @Override
     public boolean containsBeanDefinition(String beanName) {  // LBF; local only
+        setupConventionBeanIfMissing( beanName );
         if (super.containsBeanDefinition(beanName)) {
             return true;
         }
