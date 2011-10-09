@@ -17,7 +17,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
         "classpath:applicationContext-requestscoped-lazy.xml"
-}, loader = GenericXmlContextLoader.class)
+}, loader = ConventionContextLoader.class)
 
 @ConventionConfiguration(candidateEvaluator = TestCandidateEvaluator.class, nameToClassResolver = TestnameToClassResolver.class)
 public class RequestScopedLazyTest
