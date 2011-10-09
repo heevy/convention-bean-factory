@@ -19,6 +19,8 @@ package org.rosenvold.spring.convention;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -39,7 +41,7 @@ public class ConventionBeanFactory
     private final CandidateEvaluator candidateEvaluator;
     private final String[] nothing = new String[]{};
 
-    private final Map<Class, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<Class, BeanDefinition>();
+    private final Map<Class, AnnotatedBeanDefinition> beanDefinitionMap = new ConcurrentHashMap<Class, AnnotatedBeanDefinition>();
     private final Map<Class, RootBeanDefinition> mergedBeanDefinitions =
             new ConcurrentHashMap<Class, RootBeanDefinition>();
     private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
@@ -245,11 +247,12 @@ public class ConventionBeanFactory
         return doGetBean(aClass.getName(), null, null, false);
     }
 
-    private BeanDefinition getOrCreateBeanDefinition(Class<?> type) {
-        final BeanDefinition beanDefinition = beanDefinitionMap.get(type);
+    private AnnotatedBeanDefinition getOrCreateBeanDefinition(Class<?> type) {
+        final AnnotatedBeanDefinition beanDefinition = beanDefinitionMap.get(type);
         if (beanDefinition != null) return beanDefinition;
-        final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(type);
-        rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+
+        final AnnotatedBeanDefinition rootBeanDefinition = new AnnotatedGenericBeanDefinition(type);
+//        rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
         rootBeanDefinition.setScope(getAnnotatedScope(type));
         final Lazy lazy = type.getAnnotation(Lazy.class);
         if (lazy != null){

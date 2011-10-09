@@ -9,8 +9,8 @@
 
     <aop:aspectj-autoproxy proxy-target-class="false"/>
 
-    <context:component-scan base-package="org.rosenvold.spring.convention.testclasses.requestscopedlazy">
+    <!-- context:component-scan base-package="org.rosenvold.spring.convention.testclasses.requestscopedlazy">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/>
-    </context:component-scan>
+    </context:component-scan -->
 
 </beans>
