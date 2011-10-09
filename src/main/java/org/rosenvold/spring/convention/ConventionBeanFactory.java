@@ -32,7 +32,6 @@ import org.springframework.context.annotation.ScopeMetadata;
 import org.springframework.context.annotation.ScopeMetadataResolver;
 import org.springframework.context.annotation.ScopedProxyMode;
 
-import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -110,7 +109,7 @@ public class ConventionBeanFactory
     private void registerByDirectNameToClassMapping( String name )
     {
         final Class<?> type = getLocalType(name);
-        registerBeanByType(type);
+        registerBeanByType(name, type);
     }
 
     @Override
@@ -170,7 +169,7 @@ public class ConventionBeanFactory
 
     @Override
     public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
-        setupConventionBeanIfMissing( name );
+//        setupConventionBeanIfMissing( name );
         return super.getType(  name );
     }
 
@@ -185,11 +184,7 @@ public class ConventionBeanFactory
     @Override
     public boolean containsBeanDefinition(String beanName) {  // LBF; local only
         setupConventionBeanIfMissing( beanName );
-        if (super.containsBeanDefinition(beanName)) {
-            return true;
-        }
-        final Class<?> type = getLocalType(beanName);
-        return type != null;
+        return super.containsBeanDefinition( beanName );
     }
 
     private Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
@@ -239,7 +234,7 @@ public class ConventionBeanFactory
         if (super.containsBeanDefinition(beanName)) {
             return super.getMergedLocalBeanDefinition(beanName);
         }
-        final Class<?> type = getType(beanName);
+        final Class<?> type = getLocalType( beanName );
         if (type != null) {
             RootBeanDefinition rootBeanDefinition = mergedBeanDefinitions.get( type );
             if (rootBeanDefinition != null) return  rootBeanDefinition;
@@ -280,6 +275,12 @@ public class ConventionBeanFactory
         final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition( type );
         createBeanDefinitionHolder( orCreateBeanDefinition, type.getName() );
     }
+    private void registerBeanByType( String beanName, Class<?> type )
+    {
+        if (type == null) return;
+        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition( type );
+        createBeanDefinitionHolder( beanName, orCreateBeanDefinition );
+    }
 
     private BeanDefinitionHolder createBeanDefinitionHolder(BeanDefinition candidate, String beanName){
         BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
@@ -288,7 +289,14 @@ public class ConventionBeanFactory
         definitionHolder = applyScopedProxyMode( scopeMetadata, definitionHolder, this );
         registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition() );
         return definitionHolder;
+    }
+    private BeanDefinitionHolder createBeanDefinitionHolder( String realbeanName, BeanDefinition candidate ){
+        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, realbeanName);
+        ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 
+        definitionHolder = applyScopedProxyMode( scopeMetadata, definitionHolder, this );
+        registerBeanDefinition(realbeanName, definitionHolder.getBeanDefinition() );
+        return definitionHolder;
     }
 
     static BeanDefinitionHolder applyScopedProxyMode(

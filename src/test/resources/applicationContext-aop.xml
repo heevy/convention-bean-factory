@@ -10,5 +10,5 @@
     <aop:aspectj-autoproxy proxy-target-class="false"/>
 
   <bean class="org.rosenvold.spring.convention.aopclasses.TestAspect"/>
-  <bean class="org.rosenvold.spring.convention.aopclasses.DefaultTestInterface"/>
+  <!--  bean class="org.rosenvold.spring.convention.aopclasses.DefaultTestInterface"/ -->
 </beans>

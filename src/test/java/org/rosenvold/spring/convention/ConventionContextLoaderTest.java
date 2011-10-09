@@ -7,6 +7,7 @@ import org.rosenvold.spring.convention.testclasses.TestService2;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 /**
@@ -32,7 +33,7 @@ public class ConventionContextLoaderTest {
         assertNotNull(testService2.testService);
         assertNotNull(testService2.interfaceLessService);
         assertNotNull( testService2.test);
-//        assertEquals(2,testService2.test.size());
+        assertEquals(2,testService2.test.size());
 
 
     }
