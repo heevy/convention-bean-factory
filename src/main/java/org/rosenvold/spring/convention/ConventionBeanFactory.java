@@ -97,8 +97,7 @@ public class ConventionBeanFactory
     public Object getBean(String name) throws BeansException {
 
         if (!super.containsBeanDefinition(name)) {
-            final Class<?> type = getLocalType(name);
-            registerBeanByType(type);
+            registerByDirectNameToClassMapping( name );
         }
         return super.getBean(name);
     }
@@ -107,10 +106,15 @@ public class ConventionBeanFactory
     @Override
     public <T> T getBean(String name, Class<T> tClass) throws BeansException {
         if (!super.containsBeanDefinition(name)) {
-            final Class<?> type = getLocalType(name);
-            registerBeanByType(type);
+            registerByDirectNameToClassMapping( name );
         }
         return super.getBean(name, tClass);
+    }
+
+    private void registerByDirectNameToClassMapping( String name )
+    {
+        final Class<?> type = getLocalType(name);
+        registerBeanByType(type);
     }
 
     @Override
