@@ -174,7 +174,7 @@ public class ConventionBeanFactory
 
     @Override
     public boolean containsBeanDefinition(String beanName) {  // LBF; local only
-        setupConventionBeanIfMissing(beanName);
+        //setupConventionBeanIfMissing(beanName);
         return super.containsBeanDefinition(beanName);
     }
 
@@ -257,6 +257,10 @@ public class ConventionBeanFactory
     private AnnotatedBeanDefinition getOrCreateBeanDefinition(Class<?> type) {
         final AnnotatedBeanDefinition beanDefinition = beanDefinitionMap.get(type);
         if (beanDefinition != null) return beanDefinition;
+
+        if (type.getName().contains("SeleniumConfigurationFactoryBean")){
+            System.out.println("Hey");
+        }
 
         final ScannedGenericBeanDefinition rootBeanDefinition = getScannedBeanDefinition(type);
         rootBeanDefinition.applyDefaults(this.beanDefinitionDefaults);
