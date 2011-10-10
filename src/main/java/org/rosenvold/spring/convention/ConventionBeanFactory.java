@@ -20,6 +20,7 @@ import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -324,6 +325,13 @@ public class ConventionBeanFactory
             abd.setDependsOn(value);
         }
     }
+
+    private final QualifierAnnotationAutowireCandidateResolver qualifierAnnotationAutowireCandidateResolver = new QualifierAnnotationAutowireCandidateResolver();
+
+    public AutowireCandidateResolver getAutowireCandidateResolver() {
+   		return this.qualifierAnnotationAutowireCandidateResolver;
+   	}
+
 
 
 }

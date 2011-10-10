@@ -1,6 +1,8 @@
 package org.rosenvold.spring.convention.scope;
 
 import org.rosenvold.spring.convention.ConventionContextLoader;
+import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
@@ -156,5 +158,4 @@ public class MockSessionScopeContextLoader extends ConventionContextLoader {
             return locale;
         }
     }
-
 }
