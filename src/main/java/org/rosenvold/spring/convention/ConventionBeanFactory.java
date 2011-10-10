@@ -20,16 +20,18 @@ import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.*;
 import org.springframework.context.annotation.*;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,6 +47,12 @@ public class ConventionBeanFactory
     private final Map<Class, RootBeanDefinition> mergedBeanDefinitions =
             new ConcurrentHashMap<Class, RootBeanDefinition>();
     private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+
+
+    private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+    private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+
+    private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
 
     public ConventionBeanFactory(NameToClassResolver beanClassResolver,
                                  CandidateEvaluator candidateEvaluator) {
@@ -171,7 +179,6 @@ public class ConventionBeanFactory
     }
 
 
-
     @Override
     protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName)
             throws BeansException {
@@ -251,16 +258,27 @@ public class ConventionBeanFactory
         final AnnotatedBeanDefinition beanDefinition = beanDefinitionMap.get(type);
         if (beanDefinition != null) return beanDefinition;
 
-        final AnnotatedBeanDefinition rootBeanDefinition = new AnnotatedGenericBeanDefinition(type);
+        final ScannedGenericBeanDefinition rootBeanDefinition = getScannedBeanDefinition(type);
+        rootBeanDefinition.applyDefaults(this.beanDefinitionDefaults);
+
 //        rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+        processCommonDefinitionAnnotations(rootBeanDefinition);
+
         rootBeanDefinition.setScope(getAnnotatedScope(type));
-        final Lazy lazy = type.getAnnotation(Lazy.class);
-        if (lazy != null){
-            rootBeanDefinition.setLazyInit(lazy.value());
-        }
+
         beanDefinitionMap.put(type, rootBeanDefinition);
         return rootBeanDefinition;
     }
+
+    private ScannedGenericBeanDefinition getScannedBeanDefinition(Class clazz) {
+        try {
+            MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(clazz.getName());
+            return new ScannedGenericBeanDefinition(metadataReader);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private void registerBeanByType(String beanName, Class<?> type) {
         if (type == null) return;
@@ -287,4 +305,21 @@ public class ConventionBeanFactory
         boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
         return ScopedProxyUtils.createScopedProxy(definition, registry, proxyTargetClass);
     }
+
+    // Ripped from ActionConfigUtils
+    static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
+        if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
+            abd.setPrimary(true);
+        }
+        if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
+            Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
+            abd.setLazyInit(value);
+        }
+        if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
+            String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
+            abd.setDependsOn(value);
+        }
+    }
+
+
 }
