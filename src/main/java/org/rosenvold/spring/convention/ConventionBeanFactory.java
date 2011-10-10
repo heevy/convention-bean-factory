@@ -259,10 +259,6 @@ public class ConventionBeanFactory
         final AnnotatedBeanDefinition beanDefinition = beanDefinitionMap.get(type);
         if (beanDefinition != null) return beanDefinition;
 
-        if (type.getName().contains("SeleniumConfigurationFactoryBean")){
-            System.out.println("Hey");
-        }
-
         final ScannedGenericBeanDefinition rootBeanDefinition = getScannedBeanDefinition(type);
         rootBeanDefinition.applyDefaults(this.beanDefinitionDefaults);
 
