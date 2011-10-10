@@ -135,6 +135,7 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 - convention is not picky about deciding to use /anything/ satisfying a candidateEvaluator as a bean.
 - Convention does not handle wiring of abstract classes (should be easy to fix).
 - Aspect implementations must be defined traditionally
+- Context will deadlock brutally and effectively if running multithreaded.
 
 *Submit pull-requests with testscases, no testcase no can do*
 
