@@ -12,7 +12,7 @@
         </license>
     </licenses>
     <packaging>jar</packaging>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <name>convention-bean-factory</name>
     <url>http://github.com/krosenvold/convention-bean-factory</url>
 
