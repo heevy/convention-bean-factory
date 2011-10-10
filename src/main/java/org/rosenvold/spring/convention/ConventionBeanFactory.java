@@ -18,6 +18,7 @@ package org.rosenvold.spring.convention;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
@@ -44,7 +45,7 @@ public class ConventionBeanFactory
     private final CandidateEvaluator candidateEvaluator;
     private final String[] nothing = new String[]{};
 
-    private final Map<Class, AnnotatedBeanDefinition> beanDefinitionMap = new ConcurrentHashMap<Class, AnnotatedBeanDefinition>();
+    private final Map<Class, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<Class, BeanDefinition>();
     private final Map<Class, RootBeanDefinition> mergedBeanDefinitions =
             new ConcurrentHashMap<Class, RootBeanDefinition>();
     private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
@@ -113,11 +114,6 @@ public class ConventionBeanFactory
         return super.getBean(name, tClass);
     }
 
-    private void registerByDirectNameToClassMapping(String name) {
-        final Class<?> type = getLocalType(name);
-        registerBeanByType(name, type);
-    }
-
     @Override
     public Object getBean(String name, Object... objects) throws BeansException {
         setupConventionBeanIfMissing(name);
@@ -127,7 +123,13 @@ public class ConventionBeanFactory
     @Override
     public boolean containsBean(String name) {
         setupConventionBeanIfMissing(name);
+        if (containsConventioBean( name)) return true;
         return super.containsBean(name);
+    }
+    private boolean containsConventioBean(String name){
+        Class local = getSourceType( name);
+        return local !=null && beanDefinitionMap.containsKey( local);
+        
     }
 
     @Override
@@ -206,19 +208,24 @@ public class ConventionBeanFactory
         if (super.containsBeanDefinition(beanName)) {
             return super.getBeanDefinition(beanName);
         }
+        Class sourceType = getSourceType( beanName);
         final Class<?> type = getType(beanName);
-        return getOrCreateBeanDefinition(type);
+        return getOrCreateBeanDefinition(sourceType, type);
     }
 
-    private void setupConventionBeanIfMissing(String name) {
-        if (!super.containsBeanDefinition(name)) {
-            registerByDirectNameToClassMapping(name);
-        }
-    }
+
 
     private Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
         final Class aClass = resolveImplClass(s);
         return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null;
+    }
+
+    private Class<?> getSourceType(String s) throws NoSuchBeanDefinitionException {
+        try {
+            return Class.forName(s);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 
 
@@ -255,8 +262,8 @@ public class ConventionBeanFactory
         return doGetBean(aClass.getName(), null, null, false);
     }
 
-    private AnnotatedBeanDefinition getOrCreateBeanDefinition(Class<?> type) {
-        final AnnotatedBeanDefinition beanDefinition = beanDefinitionMap.get(type);
+    private BeanDefinition getOrCreateBeanDefinition(Class<?> sourceType, Class<?> type) {
+        final BeanDefinition beanDefinition = beanDefinitionMap.get(type);
         if (beanDefinition != null) return beanDefinition;
 
         final ScannedGenericBeanDefinition rootBeanDefinition = getScannedBeanDefinition(type);
@@ -267,7 +274,7 @@ public class ConventionBeanFactory
 
         rootBeanDefinition.setScope(getAnnotatedScope(type));
 
-        beanDefinitionMap.put(type, rootBeanDefinition);
+        beanDefinitionMap.put(sourceType, rootBeanDefinition);
         return rootBeanDefinition;
     }
 
@@ -280,20 +287,36 @@ public class ConventionBeanFactory
         }
     }
 
+    private void setupConventionBeanIfMissing(String name) {
+        if (!super.containsBeanDefinition(name)) {
+            registerByDirectNameToClassMapping(name);
+        }
+    }
 
-    private void registerBeanByType(String beanName, Class<?> type) {
+    private void registerByDirectNameToClassMapping(String name) {
+        final Class<?> sourceType = getSourceType( name);
+        final Class<?> type = getLocalType(name);
+        registerBeanByType(sourceType, type);
+    }
+
+    private void registerBeanByType(Class<?> beanName, Class<?> type) {
         if (type == null) return;
-        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition(type);
+        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition(beanName, type);
         createBeanDefinitionHolder(beanName, orCreateBeanDefinition);
     }
 
-    private BeanDefinitionHolder createBeanDefinitionHolder(String realbeanName, BeanDefinition candidate) {
-        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, realbeanName);
+    private BeanDefinitionHolder createBeanDefinitionHolder(Class soruceClass, BeanDefinition candidate) {
+        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, soruceClass.getName());
         ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 
         definitionHolder = applyScopedProxyMode(scopeMetadata, definitionHolder, this);
-        registerBeanDefinition(realbeanName, definitionHolder.getBeanDefinition());
+        registerConventionBeanDefinition(soruceClass, definitionHolder.getBeanDefinition());
         return definitionHolder;
+    }
+
+
+    public void registerConventionBeanDefinition(Class sourceClass, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
+        beanDefinitionMap.put(sourceClass, beanDefinition);
     }
 
     static BeanDefinitionHolder applyScopedProxyMode(
