@@ -41,9 +41,13 @@ faster than regular spring contexts.
 
 <h2>Changelog</h2>
 
+0.4 <p/>
+  scopeProxy mode annoation handled properly
+  @Value injections work.
+  Uses more of the existing spring code (more correct, a little slower)
+
 0.3 <p/>
   Prototype scope fixed<p/>
-  Version 0.3 is feature complete.
 
 0.2: <p/>
    scope proxies now work properly.<p/>
