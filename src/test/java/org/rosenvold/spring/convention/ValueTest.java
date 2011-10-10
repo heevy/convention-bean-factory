@@ -8,6 +8,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
+import static junit.framework.Assert.assertEquals;
+
 /**
  * @author <a href="mailto:kristian@zenior.no">Kristian Rosenvold</a>
  */
@@ -23,6 +25,7 @@ public class ValueTest {
     @Test
     public void checkInjectedValue(){
         final String foo = valueService.getFoo();
+        assertEquals("23", foo);
         System.out.println("foo = " + foo);
     }
 }
