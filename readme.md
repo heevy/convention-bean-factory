@@ -37,12 +37,14 @@ and can be intermingled in the same configuration: Run convention with your test
 and run regular component-scan in your production environment. Convention is normally
 faster than regular spring contexts.
 
+To avoid deadlocking, convention is quit eheavily synchronized, which probably means
+regular spring contexts are better for production environments.
 
 
 <h2>Changelog</h2>
 
 0.4 <p/>
-  scopeProxy mode annoation handled properly
+  scopeProxy mode annotation handled properly
   @Value injections work.
   Uses more of the existing spring code (more correct, a little slower)
 
@@ -135,7 +137,6 @@ of the CandidateEvaluator inteface or subclassing DefaultCandidateEvaluator.
 - convention is not picky about deciding to use /anything/ satisfying a candidateEvaluator as a bean.
 - Convention does not handle wiring of abstract classes (should be easy to fix).
 - Aspect implementations must be defined traditionally
-- Context will deadlock brutally and effectively if running multithreaded.
 
 *Submit pull-requests with testscases, no testcase no can do*
 

@@ -62,7 +62,7 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
+    public synchronized String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
         final Class cacheEntry = getCacheEntry(type);
         if (cacheEntry == null) {
             final String[] beanNamesForType = super.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
@@ -84,7 +84,7 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public <T> T getBean(Class<T> requiredType) throws BeansException {
+    public synchronized <T> T getBean(Class<T> requiredType) throws BeansException {
         final Class cacheEntry = getCacheEntry(requiredType);
         if (cacheEntry == null) {
             if (super.getBeanNamesForType(requiredType).length > 0) {
@@ -100,7 +100,7 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public Object getBean(String name) throws BeansException {
+    public synchronized Object getBean(String name) throws BeansException {
 
         setupConventionBeanIfMissing(name);
         return super.getBean(name);
@@ -108,30 +108,30 @@ public class ConventionBeanFactory
 
 
     @Override
-    public <T> T getBean(String name, Class<T> tClass) throws BeansException {
+    public synchronized <T> T getBean(String name, Class<T> tClass) throws BeansException {
         setupConventionBeanIfMissing(name);
         return super.getBean(name, tClass);
     }
 
-    private void registerByDirectNameToClassMapping(String name) {
+    private synchronized void registerByDirectNameToClassMapping(String name) {
         final Class<?> type = getLocalType(name);
         registerBeanByType(name, type);
     }
 
     @Override
-    public Object getBean(String name, Object... objects) throws BeansException {
+    public synchronized Object getBean(String name, Object... objects) throws BeansException {
         setupConventionBeanIfMissing(name);
         return super.getBean(name, objects);
     }
 
     @Override
-    public boolean containsBean(String name) {
+    public synchronized boolean containsBean(String name) {
         setupConventionBeanIfMissing(name);
         return super.containsBean(name);
     }
 
     @Override
-    public boolean isSingleton(String name)
+    public synchronized boolean isSingleton(String name)
             throws NoSuchBeanDefinitionException {
         //noinspection SimplifiableIfStatement
         setupConventionBeanIfMissing(name);
@@ -139,12 +139,12 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+    public synchronized boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
         setupConventionBeanIfMissing(name);
         return super.isPrototype(name);
     }
 
-    private String getAnnotatedScope(Class<?> type) {
+    private synchronized String getAnnotatedScope(Class<?> type) {
         if (type != null) {
             final Scope annotation = type.getAnnotation(Scope.class);
             if (annotation != null) {
@@ -155,33 +155,33 @@ public class ConventionBeanFactory
     }
 
     @Override
-    public boolean isTypeMatch(String name, Class aClass) throws NoSuchBeanDefinitionException {
+    public synchronized boolean isTypeMatch(String name, Class aClass) throws NoSuchBeanDefinitionException {
         setupConventionBeanIfMissing(name);
         return super.isTypeMatch(name, aClass);
     }
 
     @Override
-    public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+    public synchronized Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 //        setupConventionBeanIfMissing( name );  Hmpf.
         return super.getType(name);
     }
 
     @Override
-    public String[] getAliases(String name) {
+    public synchronized String[] getAliases(String name) {
         setupConventionBeanIfMissing(name);
         return super.getAliases(name);
     }
 
 
     @Override
-    public boolean containsBeanDefinition(String beanName) {  // LBF; local only
+    public synchronized boolean containsBeanDefinition(String beanName) {  // LBF; local only
         //setupConventionBeanIfMissing(beanName);
         return super.containsBeanDefinition(beanName);
     }
 
 
     @Override
-    protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName)
+    protected synchronized RootBeanDefinition getMergedLocalBeanDefinition(String beanName)
             throws BeansException {
         if (super.containsBeanDefinition(beanName)) {
             return super.getMergedLocalBeanDefinition(beanName);
@@ -202,7 +202,7 @@ public class ConventionBeanFactory
 
 
     @Override
-    public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+    public synchronized BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
         if (super.containsBeanDefinition(beanName)) {
             return super.getBeanDefinition(beanName);
         }
