@@ -48,11 +48,12 @@ public class ConventionBeanFactory
     private final Map<Class, RootBeanDefinition> mergedBeanDefinitions =
             new ConcurrentHashMap<Class, RootBeanDefinition>();
     private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+    private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
+
 
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
-
     private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
 
     public ConventionBeanFactory(NameToClassResolver beanClassResolver,
@@ -101,7 +102,6 @@ public class ConventionBeanFactory
 
     @Override
     public synchronized Object getBean(String name) throws BeansException {
-
         setupConventionBeanIfMissing(name);
         return super.getBean(name);
     }
@@ -221,8 +221,6 @@ public class ConventionBeanFactory
         return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null;
     }
 
-
-    private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
 
     private static class CacheMiss {
     }
