@@ -18,12 +18,15 @@ package org.rosenvold.spring.convention;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.annotation.*;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -31,8 +34,17 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -324,6 +336,109 @@ public class ConventionBeanFactory
 
     public AutowireCandidateResolver getAutowireCandidateResolver() {
    		return this.qualifierAnnotationAutowireCandidateResolver;
+   	}
+
+    
+    protected Map<String, Object> findAutowireCandidates(
+   			String beanName, Class requiredType, DependencyDescriptor descriptor) {
+   
+   		String[] candidateNames = getCandidateNames(requiredType, descriptor);
+
+   		Map<String, Object> result = new LinkedHashMap<String, Object>(candidateNames.length);
+   		for (Class autowiringType : this.resolvableDependencies.keySet()) {
+   			if (autowiringType.isAssignableFrom(requiredType)) {
+   				Object autowiringValue = this.resolvableDependencies.get(autowiringType);
+   				autowiringValue = resolveAutowiringValue(autowiringValue, requiredType);
+   				if (requiredType.isInstance(autowiringValue)) {
+   					result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
+   					break;
+   				}
+   			}
+   		}
+   		for (String candidateName : candidateNames) {
+   			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, descriptor)) {
+   				result.put(candidateName, getBean(candidateName));
+   			}
+   		}
+   		return result;
+   	}
+
+
+    private final Map<Class, Object> resolvableDependencies = new HashMap<Class, Object>();
+
+    public void registerResolvableDependency(Class dependencyType, Object autowiredValue) {
+   		Assert.notNull(dependencyType, "Type must not be null");
+        this.resolvableDependencies.put(dependencyType, autowiredValue);
+        super.registerResolvableDependency( dependencyType, autowiredValue);
+   	}
+
+
+    private final ConcurrentHashMap<Class, String[]> typeCache = new ConcurrentHashMap<Class, String[]>();
+    
+    private String[] getCandidateNames(Class requiredType, DependencyDescriptor descriptor) {
+        String[] strings = typeCache.get(requiredType);
+        if (strings != null) {
+            return strings;
+        }
+        strings = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+                this, requiredType, true, descriptor.isEager());
+        typeCache.put( requiredType, strings);
+        return strings;
+    }
+
+
+    	/**
+    	 * Resolve the given autowiring value against the given required type,
+    	 * e.g. an {@link org.springframework.beans.factory.ObjectFactory} value to its actual object result.
+    	 * @param autowiringValue the value to resolve
+    	 * @param requiredType the type to assign the result to
+    	 * @return the resolved value
+    	 */
+    	public static Object resolveAutowiringValue(Object autowiringValue, Class requiredType) {
+    		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
+    			ObjectFactory factory = (ObjectFactory) autowiringValue;
+    			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
+    				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
+                            new Class[]{requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
+    			}
+    			else {
+    				return factory.getObject();
+    			}
+    		}
+    		return autowiringValue;
+    	}
+
+    /**
+   	 * Reflective InvocationHandler for lazy access to the current target object.
+   	 */
+   	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {
+
+   		private final ObjectFactory objectFactory;
+
+   		public ObjectFactoryDelegatingInvocationHandler(ObjectFactory objectFactory) {
+   			this.objectFactory = objectFactory;
+   		}
+
+   		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+   			String methodName = method.getName();
+   			if (methodName.equals("equals")) {
+   				// Only consider equal when proxies are identical.
+   				return (proxy == args[0]);
+   			}
+   			else if (methodName.equals("hashCode")) {
+   				// Use hashCode of proxy.
+   				return System.identityHashCode(proxy);
+   			}
+   			else if (methodName.equals("toString")) {
+   				return this.objectFactory.toString();
+   			}
+   			try {
+   				return method.invoke(this.objectFactory.getObject(), args);
+   			}
+   			catch (InvocationTargetException ex) {
+   				throw ex.getTargetException();
+   			}
+   		}
    	}
 
 
