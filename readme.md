@@ -67,7 +67,7 @@ Add the following to your pom to download from central:</p>
      <dependency>
          <groupId>org.rosenvold.spring</groupId>
          <artifactId>convention-bean-factory</artifactId>
-         <version>0.2</version>
+         <version>0.5</version>
      <dependency>
 
 
