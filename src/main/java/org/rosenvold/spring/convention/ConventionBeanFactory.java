@@ -217,11 +217,14 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
         final Class<?> type = getResolvedType(beanName);
         if (type != null) {
             RootBeanDefinition rootBeanDefinition = mergedBeanDefinitions.get(type);
-            if (rootBeanDefinition != null) return rootBeanDefinition;
-            rootBeanDefinition = new RootBeanDefinition(type);
-            rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
-            rootBeanDefinition.setScope(getAnnotatedScope(type));
-            mergedBeanDefinitions.put(type, rootBeanDefinition);
+            if (rootBeanDefinition == null) {
+                final BeanDefinition beanDefinition = getBeanDefinition(beanName);
+                rootBeanDefinition = new RootBeanDefinition(type);
+                rootBeanDefinition.overrideFrom(beanDefinition);
+                rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+                rootBeanDefinition.setScope(getAnnotatedScope(type));
+                mergedBeanDefinitions.put(type, rootBeanDefinition);
+            }
             return rootBeanDefinition;
         }
 
