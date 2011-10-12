@@ -63,6 +63,9 @@ public class ConventionBeanFactory
     private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
 
 
+    /* Maps by type to bean names */
+    private final Map<Class, String[]> byTypeMappingSingletonsEager = new ConcurrentHashMap<Class, String[]>();
+    private final Map<Class, String[]> byTypeMappingNonSingletonsEager = new ConcurrentHashMap<Class, String[]>();
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
@@ -74,8 +77,28 @@ public class ConventionBeanFactory
         this.candidateEvaluator = candidateEvaluator;
     }
 
+    private void clearTypeBasedCaches(){
+    		byTypeMappingSingletonsEager.clear();
+    		byTypeMappingNonSingletonsEager.clear();
+    	}
+
+
     @Override
-    public synchronized String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
+    public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+  		if (type == null || !allowEagerInit) {
+  			return getBeanNamesForTypeImpl(type, includeNonSingletons, allowEagerInit);
+  		}
+  		Map<Class, String[]> cache = includeNonSingletons ? byTypeMappingNonSingletonsEager : byTypeMappingSingletonsEager;
+  		String[] resolvedBeanNames = cache.get(type);
+  		if (resolvedBeanNames != null) {
+  			return resolvedBeanNames;
+  		}
+  		resolvedBeanNames = getBeanNamesForTypeImpl(type, includeNonSingletons, allowEagerInit);
+    	cache.put( type, resolvedBeanNames);
+  		return resolvedBeanNames;
+  	}
+
+    public synchronized String[] getBeanNamesForTypeImpl(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
         final Class cacheEntry = getCacheEntry(type);
         if (cacheEntry == null) {
             final String[] beanNamesForType = super.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
@@ -408,6 +431,11 @@ public class ConventionBeanFactory
     		}
     		return autowiringValue;
     	}
+
+    protected void resetBeanDefinition(String beanName) {
+        clearTypeBasedCaches();
+        super.resetBeanDefinition(beanName);
+    }
 
     /**
    	 * Reflective InvocationHandler for lazy access to the current target object.
