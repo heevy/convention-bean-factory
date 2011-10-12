@@ -48,21 +48,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConventionBeanFactory
-        extends DefaultListableBeanFactory {
+public class ConventionBeanFactory extends DefaultListableBeanFactory {
 
     private final NameToClassResolver nameToClassResolver;
-
     private final CandidateEvaluator candidateEvaluator;
-    private final String[] nothing = new String[]{};
 
-    private final Map<Class, AnnotatedBeanDefinition> beanDefinitionMap = new ConcurrentHashMap<Class, AnnotatedBeanDefinition>();
-    private final Map<Class, RootBeanDefinition> mergedBeanDefinitions =
-            new ConcurrentHashMap<Class, RootBeanDefinition>();
-    private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
-    private final Map<String, Class> cache = new ConcurrentHashMap<String, Class>();
-
-
+    private final Map<String, AnnotatedBeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, AnnotatedBeanDefinition>();
+    private final Map<Class, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<Class, RootBeanDefinition>();
+    private final Map<String, Class> cachedConventionResolutions = new ConcurrentHashMap<String, Class>();
+    private final Map<Class, Object> resolvableDependenciesLocalCache = new HashMap<Class, Object>();
     /* Maps by type to bean names */
     private final Map<Class, String[]> byTypeMappingSingletonsEager = new ConcurrentHashMap<Class, String[]>();
     private final Map<Class, String[]> byTypeMappingNonSingletonsEager = new ConcurrentHashMap<Class, String[]>();
@@ -70,6 +64,9 @@ public class ConventionBeanFactory
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
     private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
+    private final QualifierAnnotationAutowireCandidateResolver qualifierAnnotationAutowireCandidateResolver = new QualifierAnnotationAutowireCandidateResolver();
+    private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+    private final String[] nothing = new String[]{};
 
     public ConventionBeanFactory(NameToClassResolver beanClassResolver,
                                  CandidateEvaluator candidateEvaluator) {
@@ -77,26 +74,26 @@ public class ConventionBeanFactory
         this.candidateEvaluator = candidateEvaluator;
     }
 
-    private void clearTypeBasedCaches(){
-    		byTypeMappingSingletonsEager.clear();
-    		byTypeMappingNonSingletonsEager.clear();
-    	}
+    private void clearTypeBasedCaches() {
+        byTypeMappingSingletonsEager.clear();
+        byTypeMappingNonSingletonsEager.clear();
+    }
 
 
     @Override
     public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
-  		if (type == null || !allowEagerInit) {
-  			return getBeanNamesForTypeImpl(type, includeNonSingletons, allowEagerInit);
-  		}
-  		Map<Class, String[]> cache = includeNonSingletons ? byTypeMappingNonSingletonsEager : byTypeMappingSingletonsEager;
-  		String[] resolvedBeanNames = cache.get(type);
-  		if (resolvedBeanNames != null) {
-  			return resolvedBeanNames;
-  		}
-  		resolvedBeanNames = getBeanNamesForTypeImpl(type, includeNonSingletons, allowEagerInit);
-    	cache.put( type, resolvedBeanNames);
-  		return resolvedBeanNames;
-  	}
+        if (type == null || !allowEagerInit) {
+            return getBeanNamesForTypeImpl(type, includeNonSingletons, allowEagerInit);
+        }
+        Map<Class, String[]> cache = includeNonSingletons ? byTypeMappingNonSingletonsEager : byTypeMappingSingletonsEager;
+        String[] resolvedBeanNames = cache.get(type);
+        if (resolvedBeanNames != null) {
+            return resolvedBeanNames;
+        }
+        resolvedBeanNames = getBeanNamesForTypeImpl(type, includeNonSingletons, allowEagerInit);
+        cache.put(type, resolvedBeanNames);
+        return resolvedBeanNames;
+    }
 
     public synchronized String[] getBeanNamesForTypeImpl(Class type, boolean includeNonSingletons, boolean allowEagerInit) { // LBF, local only.
         final Class cacheEntry = getCacheEntry(type);
@@ -108,17 +105,17 @@ public class ConventionBeanFactory
             if (aClass != null) {
                 return new String[]{aClass.getName()};
             }
-            return new String[]{};
+            return nothing;
         } else {
             if (isCacheMiss(cacheEntry)) {
                 return nothing;
             } else {
                 return new String[]{cacheEntry.getName()};
             }
-
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public synchronized <T> T getBean(Class<T> requiredType) throws BeansException {
         final Class cacheEntry = getCacheEntry(requiredType);
@@ -127,10 +124,8 @@ public class ConventionBeanFactory
                 return super.getBean(requiredType);
             }
             final Class aClass = resolveClass(requiredType);
-            //noinspection unchecked
             return (T) instantiate(aClass);
         } else {
-            //noinspection unchecked
             return isCacheMiss(cacheEntry) ? null : (T) instantiate(cacheEntry);
         }
     }
@@ -149,8 +144,8 @@ public class ConventionBeanFactory
     }
 
     private synchronized void registerByDirectNameToClassMapping(String name) {
-        final Class<?> type = getLocalType(name);
-        registerBeanByType(name, type);
+        final Class<?> type = getResolvedType(name);
+        registerBeanByResolvedType(name, type);
     }
 
     @Override
@@ -168,7 +163,6 @@ public class ConventionBeanFactory
     @Override
     public synchronized boolean isSingleton(String name)
             throws NoSuchBeanDefinitionException {
-        //noinspection SimplifiableIfStatement
         setupConventionBeanIfMissing(name);
         return super.isSingleton(name);
     }
@@ -197,7 +191,6 @@ public class ConventionBeanFactory
 
     @Override
     public synchronized Class<?> getType(String name) throws NoSuchBeanDefinitionException {
-//        setupConventionBeanIfMissing( name );  Hmpf.
         return super.getType(name);
     }
 
@@ -221,7 +214,7 @@ public class ConventionBeanFactory
         if (super.containsBeanDefinition(beanName)) {
             return super.getMergedLocalBeanDefinition(beanName);
         }
-        final Class<?> type = getLocalType(beanName);
+        final Class<?> type = getResolvedType(beanName);
         if (type != null) {
             RootBeanDefinition rootBeanDefinition = mergedBeanDefinitions.get(type);
             if (rootBeanDefinition != null) return rootBeanDefinition;
@@ -241,8 +234,8 @@ public class ConventionBeanFactory
         if (super.containsBeanDefinition(beanName)) {
             return super.getBeanDefinition(beanName);
         }
-        final Class<?> type = getType(beanName);
-        return getOrCreateBeanDefinition(type);
+        final Class<?> resolvedType = getResolvedType(beanName);
+        return getOrCreateBeanDefinition(beanName, resolvedType);
     }
 
     private void setupConventionBeanIfMissing(String name) {
@@ -251,7 +244,7 @@ public class ConventionBeanFactory
         }
     }
 
-    private Class<?> getLocalType(String s) throws NoSuchBeanDefinitionException {
+    private Class<?> getResolvedType(String s) throws NoSuchBeanDefinitionException {
         final Class aClass = resolveImplClass(s);
         return aClass != null && candidateEvaluator.isBean(aClass) ? aClass : null;
     }
@@ -261,15 +254,15 @@ public class ConventionBeanFactory
     }
 
     private Class resolveImplClass(final String beanName) {
-        Class aClass = cache.get(beanName);
+        Class aClass = cachedConventionResolutions.get(beanName);
         if (aClass != null && !CacheMiss.class.equals(aClass)) return aClass;
         aClass = nameToClassResolver.resolveBean(beanName, candidateEvaluator);
-        cache.put(beanName, aClass != null ? aClass : CacheMiss.class);
+        cachedConventionResolutions.put(beanName, aClass != null ? aClass : CacheMiss.class);
         return aClass;
     }
 
     private Class getCacheEntry(Class key) {
-        return cache.get(beanNameFromClass(key));
+        return cachedConventionResolutions.get(beanNameFromClass(key));
     }
 
     private boolean isCacheMiss(Class cacheResult) {
@@ -288,21 +281,33 @@ public class ConventionBeanFactory
         return doGetBean(aClass.getName(), null, null, false);
     }
 
-    private AnnotatedBeanDefinition getOrCreateBeanDefinition(Class<?> type) {
-        final AnnotatedBeanDefinition beanDefinition = beanDefinitionMap.get(type);
-        if (beanDefinition != null) return beanDefinition;
+    private AnnotatedBeanDefinition getOrCreateBeanDefinition(String beanName, Class<?> resolvedType) {
+        AnnotatedBeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        if (beanDefinition == null) {
+            beanDefinition = createScannedBeanDefinition(resolvedType);
+            beanDefinitionMap.put(beanName, beanDefinition);
+        }
+        return beanDefinition;
+    }
 
-        final ScannedGenericBeanDefinition rootBeanDefinition = getScannedBeanDefinition(type);
+    private ScannedGenericBeanDefinition createScannedBeanDefinition(Class<?> resolvedType) {
+        final ScannedGenericBeanDefinition rootBeanDefinition = getScannedBeanDefinition(resolvedType);
         rootBeanDefinition.applyDefaults(this.beanDefinitionDefaults);
-
-//        rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
         processCommonDefinitionAnnotations(rootBeanDefinition);
-
-        rootBeanDefinition.setScope(getAnnotatedScope(type));
-
-        beanDefinitionMap.put(type, rootBeanDefinition);
+        rootBeanDefinition.setScope(getAnnotatedScope(resolvedType));
         return rootBeanDefinition;
     }
+
+    /*on beanDefinition = beanDefinitionMap.get(beanName);
+       if (beanDefinition != null) return beanDefinition;
+
+       final ScannedGenericBeanDefinition rootBeanDefinition = getScannedBeanDefinition(type);
+       rootBeanDefinition.applyDefaults(this.beanDefinitionDefaults);
+       processCommonDefinitionAnnotations(rootBeanDefinition);
+       rootBeanDefinition.setScope(getAnnotatedScope(type));
+       beanDefinitionMap.put(type, rootBeanDefinition);
+       return rootBeanDefinition;
+   } */
 
     private ScannedGenericBeanDefinition getScannedBeanDefinition(Class clazz) {
         try {
@@ -314,30 +319,17 @@ public class ConventionBeanFactory
     }
 
 
-    private void registerBeanByType(String beanName, Class<?> type) {
-        if (type == null) return;
-        final BeanDefinition orCreateBeanDefinition = getOrCreateBeanDefinition(type);
-        createBeanDefinitionHolder(beanName, orCreateBeanDefinition);
-    }
+    private void registerBeanByResolvedType(String beanName, Class<?> resolvedType) {
+        if (resolvedType == null) return;
+        final BeanDefinition beanDefinition = getOrCreateBeanDefinition(beanName, resolvedType);
+        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, beanName);
+        ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(beanDefinition);
 
-    private BeanDefinitionHolder createBeanDefinitionHolder(String realbeanName, BeanDefinition candidate) {
-        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, realbeanName);
-        ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-
-        definitionHolder = applyScopedProxyMode(scopeMetadata, definitionHolder, this);
-        registerBeanDefinition(realbeanName, definitionHolder.getBeanDefinition());
-        return definitionHolder;
-    }
-
-    static BeanDefinitionHolder applyScopedProxyMode(
-            ScopeMetadata metadata, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
-
-        ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
-        if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
-            return definition;
+        ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();
+        if (!scopedProxyMode.equals(ScopedProxyMode.NO)) {
+            definitionHolder = ScopedProxyUtils.createScopedProxy(definitionHolder, this, scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS));
         }
-        boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
-        return ScopedProxyUtils.createScopedProxy(definition, registry, proxyTargetClass);
+        registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
     }
 
     // Ripped from ActionConfigUtils
@@ -355,50 +347,47 @@ public class ConventionBeanFactory
         }
     }
 
-    private final QualifierAnnotationAutowireCandidateResolver qualifierAnnotationAutowireCandidateResolver = new QualifierAnnotationAutowireCandidateResolver();
 
     public AutowireCandidateResolver getAutowireCandidateResolver() {
-   		return this.qualifierAnnotationAutowireCandidateResolver;
-   	}
+        return this.qualifierAnnotationAutowireCandidateResolver;
+    }
 
-    
+
     protected Map<String, Object> findAutowireCandidates(
-   			String beanName, Class requiredType, DependencyDescriptor descriptor) {
+            String beanName, Class requiredType, DependencyDescriptor descriptor) {
 
 //        System.out.println("beanName = " + beanName + ", requiredType" + requiredType);
-   		String[] candidateNames = getCandidateNames(requiredType, descriptor);
+        String[] candidateNames = getCandidateNames(requiredType, descriptor);
 
-   		Map<String, Object> result = new LinkedHashMap<String, Object>(candidateNames.length);
-   		for (Class autowiringType : this.resolvableDependencies.keySet()) {
-   			if (autowiringType.isAssignableFrom(requiredType)) {
-   				Object autowiringValue = this.resolvableDependencies.get(autowiringType);
-   				autowiringValue = resolveAutowiringValue(autowiringValue, requiredType);
-   				if (requiredType.isInstance(autowiringValue)) {
-   					result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
-   					break;
-   				}
-   			}
-   		}
-   		for (String candidateName : candidateNames) {
-   			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, descriptor)) {
-   				result.put(candidateName, getBean(candidateName));
-   			}
-   		}
-   		return result;
-   	}
+        Map<String, Object> result = new LinkedHashMap<String, Object>(candidateNames.length);
+        for (Class autowiringType : this.resolvableDependenciesLocalCache.keySet()) {
+            if (autowiringType.isAssignableFrom(requiredType)) {
+                Object autowiringValue = this.resolvableDependenciesLocalCache.get(autowiringType);
+                autowiringValue = resolveAutowiringValue(autowiringValue, requiredType);
+                if (requiredType.isInstance(autowiringValue)) {
+                    result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
+                    break;
+                }
+            }
+        }
+        for (String candidateName : candidateNames) {
+            if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, descriptor)) {
+                result.put(candidateName, getBean(candidateName));
+            }
+        }
+        return result;
+    }
 
-
-    private final Map<Class, Object> resolvableDependencies = new HashMap<Class, Object>();
 
     public void registerResolvableDependency(Class dependencyType, Object autowiredValue) {
-   		Assert.notNull(dependencyType, "Type must not be null");
-        this.resolvableDependencies.put(dependencyType, autowiredValue);
-        super.registerResolvableDependency( dependencyType, autowiredValue);
-   	}
+        Assert.notNull(dependencyType, "Type must not be null");
+        this.resolvableDependenciesLocalCache.put(dependencyType, autowiredValue);
+        super.registerResolvableDependency(dependencyType, autowiredValue);
+    }
 
 
     private final ConcurrentHashMap<Class, String[]> typeCache = new ConcurrentHashMap<Class, String[]>();
-    
+
     private String[] getCandidateNames(Class requiredType, DependencyDescriptor descriptor) {
         String[] strings = typeCache.get(requiredType);
         if (strings != null) {
@@ -406,31 +395,31 @@ public class ConventionBeanFactory
         }
         strings = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
                 this, requiredType, true, descriptor.isEager());
-        typeCache.put( requiredType, strings);
+        typeCache.put(requiredType, strings);
         return strings;
     }
 
 
-    	/**
-    	 * Resolve the given autowiring value against the given required type,
-    	 * e.g. an {@link org.springframework.beans.factory.ObjectFactory} value to its actual object result.
-    	 * @param autowiringValue the value to resolve
-    	 * @param requiredType the type to assign the result to
-    	 * @return the resolved value
-    	 */
-    	public static Object resolveAutowiringValue(Object autowiringValue, Class requiredType) {
-    		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
-    			ObjectFactory factory = (ObjectFactory) autowiringValue;
-    			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
-    				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
-                            new Class[]{requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
-    			}
-    			else {
-    				return factory.getObject();
-    			}
-    		}
-    		return autowiringValue;
-    	}
+    /**
+     * Resolve the given autowiring value against the given required type,
+     * e.g. an {@link org.springframework.beans.factory.ObjectFactory} value to its actual object result.
+     *
+     * @param autowiringValue the value to resolve
+     * @param requiredType    the type to assign the result to
+     * @return the resolved value
+     */
+    public static Object resolveAutowiringValue(Object autowiringValue, Class requiredType) {
+        if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
+            ObjectFactory factory = (ObjectFactory) autowiringValue;
+            if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
+                autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
+                        new Class[]{requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
+            } else {
+                return factory.getObject();
+            }
+        }
+        return autowiringValue;
+    }
 
     protected void resetBeanDefinition(String beanName) {
         clearTypeBasedCaches();
@@ -438,38 +427,34 @@ public class ConventionBeanFactory
     }
 
     /**
-   	 * Reflective InvocationHandler for lazy access to the current target object.
-   	 */
-   	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {
+     * Reflective InvocationHandler for lazy access to the current target object.
+     */
+    private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {
 
-   		private final ObjectFactory objectFactory;
+        private final ObjectFactory objectFactory;
 
-   		public ObjectFactoryDelegatingInvocationHandler(ObjectFactory objectFactory) {
-   			this.objectFactory = objectFactory;
-   		}
+        public ObjectFactoryDelegatingInvocationHandler(ObjectFactory objectFactory) {
+            this.objectFactory = objectFactory;
+        }
 
-   		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-   			String methodName = method.getName();
-   			if (methodName.equals("equals")) {
-   				// Only consider equal when proxies are identical.
-   				return (proxy == args[0]);
-   			}
-   			else if (methodName.equals("hashCode")) {
-   				// Use hashCode of proxy.
-   				return System.identityHashCode(proxy);
-   			}
-   			else if (methodName.equals("toString")) {
-   				return this.objectFactory.toString();
-   			}
-   			try {
-   				return method.invoke(this.objectFactory.getObject(), args);
-   			}
-   			catch (InvocationTargetException ex) {
-   				throw ex.getTargetException();
-   			}
-   		}
-   	}
-
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            String methodName = method.getName();
+            if (methodName.equals("equals")) {
+                // Only consider equal when proxies are identical.
+                return (proxy == args[0]);
+            } else if (methodName.equals("hashCode")) {
+                // Use hashCode of proxy.
+                return System.identityHashCode(proxy);
+            } else if (methodName.equals("toString")) {
+                return this.objectFactory.toString();
+            }
+            try {
+                return method.invoke(this.objectFactory.getObject(), args);
+            } catch (InvocationTargetException ex) {
+                throw ex.getTargetException();
+            }
+        }
+    }
 
 
 }
