@@ -341,7 +341,8 @@ public class ConventionBeanFactory
     
     protected Map<String, Object> findAutowireCandidates(
    			String beanName, Class requiredType, DependencyDescriptor descriptor) {
-   
+
+        System.out.println("beanName = " + beanName + ", requiredType" + requiredType);
    		String[] candidateNames = getCandidateNames(requiredType, descriptor);
 
    		Map<String, Object> result = new LinkedHashMap<String, Object>(candidateNames.length);
