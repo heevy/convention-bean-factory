@@ -27,21 +27,21 @@ must /either/ be defined in traditional manner /or/ in convention mode (but a co
 can /reference/ a traditional bean and vice versa)
 
 
-<h3 style="color:red">
-Convention is alpha. Don't use this unless you're comfortable with debugging open source code. Submit pull requests instead of whining
- if something doesn't work.
-</h3>
-
 Convention is designed as an efficient replacement for component-scan based contexts,
 and can be intermingled in the same configuration: Run convention with your tests
 and run regular component-scan in your production environment. Convention is normally
 faster than regular spring contexts.
 
-To avoid deadlocking, convention is quit eheavily synchronized, which probably means
-regular spring contexts are better for production environments.
+To avoid deadlocking, convention is quite heavily synchronized, which probably means
+regular spring contexts are better for production environments. (But I will not be *totally* convinced this
+is true since we're so much faster than conventional spring)
 
 
 <h2>Changelog</h2>
+
+0.5 <p/>
+  Optimized, optimized, optimized.
+  Current cache implementation is a bit of a ragtag band of hashmaps, but really fast. Make pretty later ;)
 
 0.4 <p/>
   scopeProxy mode annotation handled properly
