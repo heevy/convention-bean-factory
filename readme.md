@@ -39,6 +39,9 @@ is true since we're so much faster than conventional spring)
 
 <h2>Changelog</h2>
 
+0.6 <p/>
+  More caching.
+
 0.5 <p/>
   Optimized, optimized, optimized.
   Current cache implementation is a bit of a ragtag band of hashmaps, but really fast. Make pretty later ;)
