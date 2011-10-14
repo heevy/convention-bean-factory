@@ -239,6 +239,15 @@ public class ConventionBeanFactory extends DefaultListableBeanFactory {
         final Class<?> resolvedType = getResolvedType(beanName);
         return getOrCreateBeanDefinition(beanName, resolvedType);
     }
+    
+    protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
+        final Class<?> resolvedType = getResolvedType(beanName);
+        if (resolvedType != null) return resolvedType;
+
+        return super.predictBeanType( beanName, mbd, typesToMatch);
+   	}
+   
+    
 
     private void setupConventionBeanIfMissing(String name) {
         if (!super.containsBeanDefinition(name)) {
